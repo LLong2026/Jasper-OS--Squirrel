@@ -1,0 +1,84 @@
+{
+  "name": "OptimizationEvent",
+  "type": "object",
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "description": "Unique proposal identifier"
+    },
+    "optimization_type": {
+      "type": "string",
+      "enum": [
+        "hyperparameter_tuning",
+        "data_augmentation",
+        "feature_engineering",
+        "architecture_search",
+        "prompt_refinement"
+      ],
+      "description": "Nature of the self-optimization proposal"
+    },
+    "source_agent": {
+      "type": "string",
+      "description": "Agent that proposed this optimization"
+    },
+    "target_agent": {
+      "type": "string",
+      "description": "Agent targeted by the optimization (default: recursive_trainer)"
+    },
+    "proposed_changes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Detailed proposed changes (e.g. new_learning_rate, augment techniques, new features)"
+    },
+    "expected_improvement": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Expected performance gains"
+    },
+    "impact_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Measured impact after execution (positive = improvement)"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "evaluating",
+        "approved",
+        "executing",
+        "completed",
+        "failed",
+        "rejected"
+      ],
+      "default": "proposed"
+    },
+    "actual_results": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Measured results after execution (accuracy before/after, latency, side effects)"
+    },
+    "completed_at": {
+      "type": "number",
+      "description": "Timestamp when the optimization was completed"
+    },
+    "created_at": {
+      "type": "number",
+      "description": "Creation timestamp"
+    }
+  },
+  "required": [
+    "proposal_id",
+    "optimization_type",
+    "source_agent"
+  ]
+}

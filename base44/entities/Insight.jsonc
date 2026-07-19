@@ -1,0 +1,49 @@
+{
+  "name": "Insight",
+  "type": "object",
+  "properties": {
+    "insight_id": {
+      "type": "string",
+      "description": "Unique insight identifier"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short insight headline"
+    },
+    "content": {
+      "type": "string",
+      "description": "Detailed actionable recommendation"
+    },
+    "category": {
+      "type": "string",
+      "description": "Insight category (e.g. hyperparameter_tuning, data_augmentation)"
+    },
+    "impact_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Measured impact of applying this insight"
+    },
+    "source_pattern_id": {
+      "type": "string",
+      "description": "Pattern that generated this insight"
+    },
+    "application_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "applied",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "created_at": {
+      "type": "number",
+      "description": "Creation timestamp"
+    }
+  },
+  "required": [
+    "insight_id",
+    "title",
+    "content"
+  ]
+}

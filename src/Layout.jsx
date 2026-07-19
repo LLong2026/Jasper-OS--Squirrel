@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio, Workflow, Coins, Heart } from 'lucide-react';
+import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio, Workflow, Coins, Heart, Cpu } from 'lucide-react';
 import CollapsibleSection from '@/components/ui/CollapsibleSection';
 
 export default function Layout({ children, currentPageName }) {
@@ -22,6 +22,7 @@ export default function Layout({ children, currentPageName }) {
                 { name: 'HiveMindDashboard', href: createPageUrl('HiveMindDashboard'), icon: Brain },
                 { name: 'EvolutionDashboard', href: createPageUrl('EvolutionDashboard'), icon: GitBranch },
                 { name: 'AreteMonitor', href: createPageUrl('AreteMonitor'), icon: Dna },
+                { name: 'AreteEngine', href: createPageUrl('AreteEngine'), icon: Cpu },
                 { name: 'AINodeDashboard', href: createPageUrl('AINodeDashboard'), icon: Network },
             ]
         },

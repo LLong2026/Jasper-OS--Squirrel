@@ -1,0 +1,54 @@
+{
+  "name": "LearningMetric",
+  "type": "object",
+  "properties": {
+    "metric_id": {
+      "type": "string",
+      "description": "Unique metric identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Metric name (e.g. accuracy, loss, latency)"
+    },
+    "value": {
+      "type": "number",
+      "description": "Metric value"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "accuracy",
+        "loss",
+        "latency",
+        "throughput",
+        "cost",
+        "success_rate",
+        "convergence"
+      ],
+      "description": "Metric category"
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Additional metric context (task_type, agents, etc.)"
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "Measurement timestamp"
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Agent that generated this metric"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Knowledge domain this metric relates to"
+    }
+  },
+  "required": [
+    "metric_id",
+    "name",
+    "value",
+    "type"
+  ]
+}

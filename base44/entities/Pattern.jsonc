@@ -1,0 +1,68 @@
+{
+  "name": "Pattern",
+  "type": "object",
+  "properties": {
+    "pattern_id": {
+      "type": "string",
+      "description": "Unique pattern identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Short pattern name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "behavioral",
+        "performance",
+        "structural",
+        "temporal",
+        "anomaly"
+      ],
+      "description": "Pattern category"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed pattern description"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.5,
+      "description": "Confidence in this pattern (0-1)"
+    },
+    "occurrences": {
+      "type": "number",
+      "default": 1,
+      "description": "How many times this pattern has been observed"
+    },
+    "source_domain": {
+      "type": "string",
+      "description": "Domain where this pattern was detected"
+    },
+    "detected_at": {
+      "type": "number",
+      "description": "Detection timestamp"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "validated",
+        "deprecated"
+      ],
+      "default": "active"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Additional pattern context"
+    }
+  },
+  "required": [
+    "pattern_id",
+    "name",
+    "type"
+  ]
+}
