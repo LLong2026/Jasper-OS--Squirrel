@@ -1,0 +1,45 @@
+{
+  "name": "Weekly Stability & Optimization Export",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "weekly_stability_optimization_export",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "export_stability_trends": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "stabilitySheetsExport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Export stability & optimization trends",
+            "description": "Push new records to Google Sheet"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Runs the stabilitySheetsExport backend function every Monday at 9am (America/Chicago), pushing new Arete optimization proposals and platform stability records (settlement alerts, Aegis anomalies, healing events) to the connected Google Sheet.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * 1",
+      "one_time_date": null,
+      "timezone": "America/Chicago",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
