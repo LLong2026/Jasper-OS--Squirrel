@@ -63,7 +63,7 @@ export default function IntegrationHub() {
                     amount: 1,
                     currency: 'USD',
                 });
-                setTestResults(prev => ({ ...prev, [integration.id]: res?.success ? 'success' : 'error' }));
+                setTestResults(prev => ({ ...prev, [integration.id]: res?.data?.success ? 'success' : 'error' }));
                 return;
             }
             // Simple ping test for other integrations
