@@ -3,7 +3,7 @@
     "document": {
       "dsl": "1.0.0",
       "name": "optimization_event_export",
-      "version": "1.0",
+      "version": "1.1",
       "namespace": "base44"
     },
     "do": [
@@ -14,10 +14,26 @@
             "function_name": "stabilitySheetsExport",
             "args": {}
           },
-          "then": "end",
+          "then": "mark_exported",
           "x-base44": {
             "title": "Export to Google Sheets on new Arete proposal",
             "description": "Pushes new optimization proposal + any pending stability logs"
+          }
+        }
+      },
+      {
+        "mark_exported": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "markOptimizationExported",
+            "args": {
+              "entity_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Mark proposal as exported",
+            "description": "Sets OptimizationEvent status to exported"
           }
         }
       }
@@ -34,5 +50,5 @@
       ]
     }
   },
-  "description": "Triggers a Google Sheets stability export whenever a new Arete optimization proposal is logged"
+  "description": "Triggers a Google Sheets stability export whenever a new Arete optimization proposal is logged, then marks the proposal as exported"
 }

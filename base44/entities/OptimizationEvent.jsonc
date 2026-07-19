@@ -58,7 +58,8 @@
         "executing",
         "completed",
         "failed",
-        "rejected"
+        "rejected",
+        "exported"
       ],
       "default": "proposed"
     },
