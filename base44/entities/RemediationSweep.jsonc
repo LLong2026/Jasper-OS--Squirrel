@@ -1,0 +1,67 @@
+{
+  "name": "RemediationSweep",
+  "type": "object",
+  "properties": {
+    "sweep_type": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "manual",
+        "triggered"
+      ],
+      "default": "scheduled",
+      "description": "How the sweep was initiated"
+    },
+    "started_at": {
+      "type": "string",
+      "description": "ISO timestamp when the sweep started"
+    },
+    "completed_at": {
+      "type": "string",
+      "description": "ISO timestamp when the sweep completed"
+    },
+    "anomalies_found": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of anomalies detected during the sweep"
+    },
+    "anomalies_resolved": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of anomalies resolved during the sweep"
+    },
+    "agents_rebalanced": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of agents rebalanced"
+    },
+    "orphans_purged": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of orphan nodes purged"
+    },
+    "nodes_refreshed": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of nodes refreshed"
+    },
+    "healing_events_created": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of healing events created"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable summary of the sweep outcome"
+    },
+    "triggered_by": {
+      "type": "string",
+      "description": "Actor or system that triggered the sweep"
+    }
+  },
+  "required": [
+    "sweep_type",
+    "started_at",
+    "triggered_by"
+  ]
+}

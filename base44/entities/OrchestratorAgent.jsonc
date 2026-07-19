@@ -1,0 +1,61 @@
+{
+  "name": "OrchestratorAgent",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-friendly agent name"
+    },
+    "agent_type": {
+      "type": "string",
+      "description": "Functional type (e.g. master_supervisor, healing_brain)"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Domain this agent operates in (e.g. orchestration, self_healing)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "idle",
+        "overloaded",
+        "failed"
+      ],
+      "default": "active",
+      "description": "Agent lifecycle status"
+    },
+    "max_concurrent_tasks": {
+      "type": "number",
+      "default": 10,
+      "description": "Maximum concurrent tasks this agent can handle"
+    },
+    "health_score": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Health score (0-100)"
+    },
+    "avg_response_time_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Average response time in seconds"
+    },
+    "success_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Task success rate (0-100)"
+    },
+    "self_optimization_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the agent can self-optimize"
+    }
+  },
+  "required": [
+    "name",
+    "agent_type",
+    "domain"
+  ]
+}

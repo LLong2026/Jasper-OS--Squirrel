@@ -1,0 +1,51 @@
+{
+  "name": "OrchestratorNode",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-friendly node name"
+    },
+    "node_type": {
+      "type": "string",
+      "description": "Node category (e.g. compute, memory_optimized)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "orphaned",
+        "refreshing",
+        "failed"
+      ],
+      "default": "active",
+      "description": "Node lifecycle status"
+    },
+    "cpu_cores": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of CPU cores"
+    },
+    "ram_gb": {
+      "type": "number",
+      "default": 0,
+      "description": "RAM in gigabytes"
+    },
+    "health_score": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Node health score (0-100)"
+    },
+    "auto_scaling_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether auto-scaling is enabled on this node"
+    }
+  },
+  "required": [
+    "name",
+    "node_type"
+  ]
+}
