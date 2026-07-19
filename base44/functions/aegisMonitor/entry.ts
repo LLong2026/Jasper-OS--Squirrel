@@ -92,6 +92,33 @@ Deno.serve(async (req) => {
         });
       }
 
+      // 4. Integration health — probe LLM provider failover layer (PB-017 trigger)
+      try {
+        const intT0 = Date.now();
+        const raw = await base44.functions.invoke('freeLLMRouter', { action: 'health_check' });
+        const intResult = raw?.data || raw;
+        const intLatency = Date.now() - intT0;
+        checks.integration = { healthy: true, latency_ms: intLatency, providers: intResult?.providers || intResult?.healthy_provider || 'default' };
+        if (intLatency > 5000) {
+          anomalies.push({
+            anomaly_id: `anom_${ts}_int${Math.random().toString(36).slice(2, 8)}`,
+            anomaly_type: 'integration_degraded', category: 'infra',
+            severity: 'medium', component: 'freeLLMRouter',
+            description: `LLM integration degraded: health check took ${intLatency}ms (threshold 5000ms)`,
+            detected_at: ts, metrics: { latency_ms: intLatency, provider_status: intResult }, status: 'detected',
+          });
+        }
+      } catch (e) {
+        checks.integration = { healthy: false, error: e.message };
+        anomalies.push({
+          anomaly_id: `anom_${ts}_int${Math.random().toString(36).slice(2, 8)}`,
+          anomaly_type: 'integration_degraded', category: 'infra',
+          severity: 'high', component: 'freeLLMRouter',
+          description: `LLM integration layer unreachable: ${e.message}`,
+          detected_at: ts, metrics: { error: e.message }, status: 'detected',
+        });
+      }
+
       // Persist anomalies (dedupe: skip if an active one of same type+component exists)
       const persisted = [];
       for (const a of anomalies) {
@@ -140,7 +167,7 @@ Deno.serve(async (req) => {
           success_rate: successRate, avg_recovery_ms: avgRecovery,
           total_healing_events: healingEvents.length, successful_heals: succHeals,
         },
-        proof: { source: 'Aegis Monitor', details: `Scanned ${PROBE_ENTITIES.length} entities + crypto posture + Chronos vitality` },
+        proof: { source: 'Aegis Monitor', details: `Scanned ${PROBE_ENTITIES.length} entities + crypto posture + Chronos vitality + integration health` },
       });
     }
 
