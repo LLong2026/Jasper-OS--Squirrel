@@ -127,8 +127,10 @@ export default function Layout({ children, currentPageName }) {
                 </>
             )}
 
-            <div className="flex-1 flex flex-col overflow-y-auto">
-                {children}
+            <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                    {children}
+                </div>
                 <LegalFooter />
             </div>
         </div>

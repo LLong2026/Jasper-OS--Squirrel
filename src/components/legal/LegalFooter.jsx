@@ -3,7 +3,7 @@ import { Shield } from 'lucide-react';
 
 export default function LegalFooter() {
   return (
-    <footer className="mt-auto border-t border-slate-800 bg-slate-950/60 px-4 py-3">
+    <footer className="border-t border-slate-800 bg-slate-950/60 px-4 py-3 shrink-0">
       <div className="max-w-7xl mx-auto space-y-1.5">
         <div className="flex items-start gap-2 text-[10px] leading-relaxed text-slate-500">
           <Shield className="h-3 w-3 shrink-0 mt-0.5 text-slate-600" />
