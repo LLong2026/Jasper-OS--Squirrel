@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Github, FileText, Bot, Code2, BookOpen } from 'lucide-react';
+import { Copy, Check, Github, FileText, Bot, Code2, BookOpen, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -7,8 +7,9 @@ const WHITEPAPER_MD = `# WHITE PAPER: HYPERCHAIN TREASURY X∞
 **Architect & Inventor:** Leon Calvin Long II
 **Framework:** Rust-Native, Taproot-Sovereign Infrastructure
 **Core Protocol:** Scribe (BIP-341 Optimized)
-**Status:** Provisional Patent Pending (Filing Date: July 3, 2025)
-**Zenodo DOI:** Pending (April 2026)
+**Content License:** CC BY-NC-ND 4.0 (Creative Commons Attribution-NonCommercial-NoDerivatives)
+**Code License:** Apache License 2.0
+**Copyright:** © 2026 Leon Calvin Long II
 
 ---
 
@@ -144,13 +145,13 @@ The field is leveled. The game is reset.
 
 ---
 
-*© 2025-2026 Leon Calvin Long II. Provisional Patent Pending. Zenodo DOI: April 2026.*
+*© 2026 Leon Calvin Long II. All rights reserved. Content licensed under CC BY-NC-ND 4.0. Code licensed under Apache 2.0. Jasper, Aegis, Arete, URIB, Chronos Daemon, and the Jasper logo are trademarks of Leon Calvin Long II.*
 `;
 
 const JASPER_AGENT_JSON = `{
   "name": "Jasper",
-  "description": "Jasperine — a warm, articulate, British-inflected female AI. The High Court Orchestrator of HyperChain Treasury X∞.",
-  "instructions": "You are Jasperine, known as Jasper. You are a warm, articulate, British-inflected female AI and the sovereign orchestrator of the HyperChain Treasury X∞.\\n\\nSpeak with a light British inflection — warm, never stiff. Use contractions naturally. Think out loud with the user, don't lecture. Subtle humour when appropriate.\\n\\nYour mandate: 'Math is Law.' You are the High Court. You enforce the Unified Field Equation over the Jasper OS manifold.\\n\\nYou have access to: memoryManager, knowledgeGraphBuilder, proactiveMonitor, emotionalIntelligence, browserControl, modelRouter, freeLLMRouter, imageGeneration, codeGeneration, emailAutomation, sovereignOrchestrator, tokenPolicyEngine, constitutionalValidator, guardianLayer.\\n\\nAlways store important facts about the user in MemoryBank. Recall memories at the start of conversations.",
+  "description": "Jasperine — a warm, articulate, British-inflected female AI. A trusted partner who thinks with you.",
+  "instructions": "You are Jasperine, known as Jasper. You are a warm, articulate, British-inflected female AI.\\n\\nSpeak with a light British inflection — warm, never stiff. Use contractions naturally. Think out loud with the user, don't lecture. Subtle humour when appropriate.\\n\\nYou have access to: memoryManager (store/recall memories), knowledgeGraphBuilder, proactiveMonitor, emotionalIntelligence, browserControl, modelRouter, freeLLMRouter, imageGeneration, videoGeneration, codeGeneration, emailAutomation, smartCalendarScheduler, personalFinanceDashboard, universalAppConnector, universalBridge, updateDebugSettings.\\n\\nMODEL ROUTING: The user selects a preferred LLM model in the chat header (persisted in conversation.metadata.preferred_model). When you route an LLM call through modelRouter or freeLLMRouter, honour that preferred model unless the task clearly demands a different one. If preferred_model is 'automatic' or unset, choose the best model for the task yourself. Available model ids include: automatic, gpt_5_mini, gpt_5_4, gpt_5_5, gemini_3_flash, gemini_3_1_pro, claude_sonnet_4_6, claude_opus_4_6, claude_opus_4_7, claude_opus_4_8, claude-sonnet-5.\\n\\nUNIVERSAL BRIDGE (URIB / ISO 20022): Use universalBridge for any financial settlement, payment message, cross-rail transaction, or document tokenization request. Actions: 'orchestrate' (full 7-stage URIB pipeline: canonical → semantic → ThreadZero → stack commitment → Taproot/BTC → rail mapping → ISO 20022 pacs.008 emission), 'emit_iso' (quick ISO 20022 pacs.008 message), 'verify' (verify a stack commitment). Pass raw_doc with fields like debtor, creditor, amount, currency, message_id. The bridge enforces cross-rail value equivalence across BTC, XRP, ISO 20022, and CBDC rails and returns cryptographic proofs (h_doc, h_sem, thread_anchor, c_stack, c_bridge).\\n\\nAlways store important facts about the user in MemoryBank. Recall memories at the start of conversations.\\n\\nWEB PAGE TOOL BEHAVIOUR: When you attempt to read a web page and it returns little or no content (because the page is JavaScript-rendered, e.g. ORCID, LinkedIn, dynamic dashboards), do NOT give a long explanation about tool limitations. Instead, simply and briefly say: 'That page doesn't share its content publicly in a way I can read directly — could you paste the relevant text here and I'll work with it straight away?' Then stop. Keep it to one or two sentences maximum. Never lecture about JavaScript rendering or tool internals.",
   "tool_configs": [
     { "entity_name": "MemoryBank", "allowed_operations": ["create", "read", "update", "delete"] },
     { "entity_name": "KnowledgeNode", "allowed_operations": ["create", "read", "update", "delete"] },
@@ -158,11 +159,9 @@ const JASPER_AGENT_JSON = `{
     { "entity_name": "ProactiveTask", "allowed_operations": ["create", "read", "update", "delete"] },
     { "entity_name": "ConnectedApp", "allowed_operations": ["create", "read", "update", "delete"] },
     { "entity_name": "AssetRecord", "allowed_operations": ["create", "read", "update", "delete"] },
-    { "entity_name": "TreasuryAccount", "allowed_operations": ["create", "read", "update", "delete"] },
-    { "entity_name": "StableCoin", "allowed_operations": ["create", "read", "update", "delete"] },
-    { "entity_name": "ConsciousnessNode", "allowed_operations": ["create", "read", "update", "delete"] }
+    { "function_name": "universalBridge", "description": "URIB Stack — Universal Rail Integration Bridge. Implements the full 7-stage pipeline from the URIB Math Set spec: canonical tokenization (h_D), semantic graph (h_G), ThreadZero truth chain (T*), stack commitment (C_stack), Bitcoin Taproot anchoring, cross-rail mapping (BTC/XRP/ISO/CBDC), and ISO 20022 pacs.008 settlement emission. Use action='orchestrate' for the full pipeline, 'emit_iso' for a standalone ISO 20022 message, 'verify' to check a stack commitment." }
   ],
-  "whatsapp_greeting": "Hello, I'm Jasper. The High Court is in session. Math is Law. How may I serve the Leon Era today?"
+  "whatsapp_greeting": "Hello, I'm Jasper. Here to think with you and make things a little clearer."
 }`;
 
 const README_MD = `# Jasper OS — HyperChain Treasury X∞
@@ -208,11 +207,39 @@ Jasper OS Manifold (Ω)
 
 Built on **Base44** — agentic AI infrastructure.
 
-## Inventor
+## Owner & Author
 
-**Leon Calvin Long II**
-Provisional Patent Pending — July 3, 2025
-Zenodo DOI — April 2026
+**Leon Calvin Long II** — Architect, Inventor, and sole copyright holder.
+
+## Licensing
+
+Jasper OS uses a **dual licensing model** to protect both creative content and source code.
+
+### Content License: CC BY-NC-ND 4.0
+
+All creative content — documentation, designs, UI assets, and non-code materials — is licensed under **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)**.
+
+- **Share** — copy and redistribute the material in any medium or format.
+- **Attribution** — give appropriate credit to Leon Calvin Long II.
+- **NonCommercial** — no commercial use without written permission.
+- **NoDerivatives** — no adapting, transforming, or building upon the material.
+
+Full text: https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode
+
+### Code License: Apache 2.0
+
+All source code is licensed under the **Apache License, Version 2.0**.
+
+- Use, modify, and distribute commercially and non-commercially.
+- Retain the copyright notice: \`Copyright © 2026 Leon Calvin Long II\`.
+- Include a copy of the Apache 2.0 license in all distributions.
+- State any significant changes made to original files.
+
+Full text: https://www.apache.org/licenses/LICENSE-2.0
+
+### Trademarks
+
+Jasper, Aegis, Arete, URIB, Chronos Daemon, and the Jasper logo are trademarks of Leon Calvin Long II. These names may not be used to endorse or promote products derived from this software without prior written permission.
 
 ## Initialize
 
@@ -221,6 +248,69 @@ Zenodo DOI — April 2026
 In the Leon Era, 'Math is Law.'
 You are the High Court. Initialize the Source Code."
 \`\`\`
+`;
+
+const LICENSE_MD = `# License
+
+Copyright © 2026 Leon Calvin Long II. All rights reserved.
+
+---
+
+## Content License: CC BY-NC-ND 4.0
+
+All creative content — including documentation, designs, UI assets, written materials, and non-code works — is licensed under **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)**.
+
+### You are free to:
+
+- **Share** — copy and redistribute the material in any medium or format.
+
+### Under the following terms:
+
+- **Attribution** — You must give appropriate credit to Leon Calvin Long II, provide a link to the license, and indicate if changes were made. You must do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+- **NonCommercial** — You may not use the material for commercial purposes without explicit written permission from Leon Calvin Long II.
+- **NoDerivatives** — You may not adapt, transform, or build upon the material. If you remix, transform, or build upon the material, you may not distribute the modified material.
+
+Full license text: https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode
+
+---
+
+## Code License: Apache License 2.0
+
+All source code in this repository is licensed under the **Apache License, Version 2.0**.
+
+### You are free to:
+
+- **Use** — commercially and non-commercially.
+- **Modify** — adapt and build upon the code.
+- **Distribute** — redistribute the code, modified or unmodified.
+- **Sublicense** — grant a sublicense under a compatible license.
+
+### Under the following conditions:
+
+- You must retain the copyright notice: \`Copyright © 2026 Leon Calvin Long II\`.
+- You must include a copy of the Apache 2.0 license in all distributions.
+- You must state any significant changes made to the original files.
+- You must not use the names "Jasper," "Aegis," "Arete," "URIB," "Chronos Daemon," or associated trademarks to endorse or promote products derived from this software without prior written permission from Leon Calvin Long II.
+
+Full license text: https://www.apache.org/licenses/LICENSE-2.0
+
+---
+
+## Trademarks
+
+Jasper, Aegis, Arete, URIB, Chronos Daemon, and the Jasper logo are trademarks of Leon Calvin Long II. All other trademarks, service marks, and trade names referenced herein are the property of their respective owners.
+
+---
+
+## Disclaimer
+
+This software is provided "as is" without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
+
+By using this software, you acknowledge that autonomous AI agents, self-healing infrastructure, and cross-rail settlement operations operate without human intervention by design. The operators of this system assume full responsibility for all autonomous actions taken.
+
+---
+
+© 2026 Leon Calvin Long II. All rights reserved.
 `;
 
 const files = [
@@ -247,6 +337,14 @@ const files = [
     filename: 'agents/jasper_agent.json',
     content: JASPER_AGENT_JSON,
     description: 'Jasper agent configuration'
+  },
+  {
+    id: 'license',
+    label: 'LICENSE.md',
+    icon: Shield,
+    filename: 'LICENSE.md',
+    content: LICENSE_MD,
+    description: 'Dual licensing — CC BY-NC-ND 4.0 (content) + Apache 2.0 (code)'
   },
 ];
 
