@@ -38,6 +38,28 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Feed Aegis health metrics into the Arete recursive learning loop so
+    // infrastructure health becomes a learnable signal alongside accuracy/latency.
+    let areteIngestion = null;
+    try {
+      const areteRaw = await base44.functions.invoke('areteRecursiveEngine', {
+        action: 'ingest_aegis_health',
+        health: {
+          overall_health: monitor.overall_health,
+          health_score: monitor.health_score,
+          heartbeat_count: monitor.heartbeat_count,
+          active_anomalies: monitor.metrics?.active_anomalies ?? 0,
+          success_rate: monitor.metrics?.success_rate ?? 0,
+          avg_recovery_ms: monitor.metrics?.avg_recovery_ms ?? 0,
+          pqc_readiness_score: monitor.metrics?.pqc_readiness_score ?? 50,
+          chronos_vitality: monitor.metrics?.chronos_vitality ?? 1,
+        },
+      });
+      areteIngestion = areteRaw?.data || areteRaw;
+    } catch (e) {
+      areteIngestion = { error: e.message };
+    }
+
     return Response.json({
       success: true, session_id: body.session_id, timestamp: ts, pulse: 'active',
       system_status: monitor.overall_health, health_score: monitor.health_score,
@@ -45,7 +67,8 @@ Deno.serve(async (req) => {
       anomalies_detected: anomalies.length,
       healed: healed.length, healing_results: healed,
       metrics: monitor.metrics, checks: monitor.checks,
-      proof: { source: 'Aegis Heartbeat (Chronos Daemon)', details: `Pulse at ${new Date(ts).toISOString()}` },
+      arete_learning: areteIngestion,
+      proof: { source: 'Aegis Heartbeat (Chronos Daemon)', details: `Pulse at ${new Date(ts).toISOString()} — health fed to Arete` },
     });
   } catch (error) {
     return Response.json({ success: false, error: error.message, pulse: 'degraded' }, { status: 500 });

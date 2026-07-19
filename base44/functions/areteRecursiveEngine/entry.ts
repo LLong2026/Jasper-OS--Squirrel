@@ -372,6 +372,108 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, proposal_id, status: 'rejected' });
     }
 
+    // ─── INGEST_AEGIS_HEALTH — Aegis feeds system health into the learning loop ───
+    // Converts a SystemHealth snapshot into LearningMetric records so the Arete
+    // engine (and the Google Sheets trend export) tracks infrastructure health
+    // alongside accuracy/latency. Generates optimization proposals when health
+    // degrades so the recursive trainer can propose remediation.
+    if (action === 'ingest_aegis_health') {
+      const health = body.health || body.monitor || body;
+      const ts = Date.now();
+      const metricsCreated = [];
+      const domain = 'aegis_infrastructure';
+
+      const healthMetrics = [
+        { name: 'aegis_health_score', value: health.health_score ?? health.metrics?.health_score ?? 100, type: 'success_rate' },
+        { name: 'aegis_active_anomalies', value: health.active_anomalies ?? health.metrics?.active_anomalies ?? 0, type: 'throughput' },
+        { name: 'aegis_healing_success_rate', value: (health.success_rate ?? health.metrics?.success_rate ?? 0) * 100, type: 'success_rate' },
+        { name: 'aegis_pqc_readiness', value: health.pqc_readiness_score ?? health.metrics?.pqc_readiness_score ?? 50, type: 'accuracy' },
+        { name: 'aegis_chronos_vitality', value: (health.chronos_vitality ?? health.metrics?.chronos_vitality ?? 1) * 100, type: 'convergence' },
+        { name: 'aegis_avg_recovery_ms', value: health.avg_recovery_ms ?? health.metrics?.avg_recovery_ms ?? 0, type: 'latency' },
+      ];
+
+      for (const m of healthMetrics) {
+        try {
+          const rec = await svc.LearningMetric.create({
+            metric_id: `metric_${m.name}_${ts}_${Math.random().toString(36).slice(2, 6)}`,
+            name: m.name, value: m.value, type: m.type,
+            context: { source: 'aegis_monitor', health_status: health.overall_health || health.system_status || 'healthy', heartbeat: health.heartbeat_count },
+            timestamp: ts, agent_name: 'aegis_monitor', domain,
+          });
+          metricsCreated.push(rec);
+        } catch (e) { console.error(`Metric ${m.name} error:`, e.message); }
+      }
+
+      // Generate optimization proposal if health is degraded
+      const healthScore = health.health_score ?? health.metrics?.health_score ?? 100;
+      const activeAnomalies = health.active_anomalies ?? health.metrics?.active_anomalies ?? 0;
+      const proposalsCreated = [];
+
+      if (healthScore < 70 || activeAnomalies >= 3) {
+        try {
+          const proposal = await svc.OptimizationEvent.create({
+            proposal_id: `opt_aegis_${ts}_${Math.random().toString(36).slice(2, 6)}`,
+            optimization_type: 'architecture_search',
+            source_agent: 'aegis_monitor',
+            target_agent: 'recursive_trainer',
+            proposed_changes: {
+              trigger: 'aegis_health_degradation',
+              health_score: healthScore,
+              active_anomalies: activeAnomalies,
+              recommendation: 'Prioritize infrastructure stability optimizations — scale resources, rotate vulnerable crypto, or isolate failing components',
+            },
+            expected_improvement: { health_score_delta: 20, anomaly_reduction: 0.5 },
+            impact_score: 0,
+            risk_level: activeAnomalies >= 5 ? 'high' : 'medium',
+            status: 'proposed',
+            created_at: ts,
+          });
+          proposalsCreated.push(proposal);
+        } catch (e) { console.error('Aegis proposal error:', e.message); }
+      }
+
+      // Detect recurring anomaly patterns from Aegis data
+      try {
+        if (activeAnomalies > 0) {
+          const existing = await svc.Pattern.filter({ name: 'aegis_recurring_anomalies' });
+          if (existing.length > 0) {
+            await svc.Pattern.update(existing[0].id, {
+              occurrences: (existing[0].occurrences || 1) + 1,
+              confidence: Math.min((existing[0].confidence || 0.5) + 0.03, 1),
+              detected_at: ts,
+              metadata: { latest_health_score: healthScore, latest_anomaly_count: activeAnomalies },
+            });
+          } else {
+            await svc.Pattern.create({
+              pattern_id: `pat_aegis_${ts}`,
+              name: 'aegis_recurring_anomalies',
+              type: 'anomaly',
+              description: `Aegis detected ${activeAnomalies} active anomaly/anomalies during health sweep. Health score: ${healthScore}.`,
+              confidence: 0.55,
+              occurrences: 1,
+              source_domain: domain,
+              detected_at: ts,
+              status: 'active',
+              metadata: { latest_health_score: healthScore, latest_anomaly_count: activeAnomalies },
+            });
+          }
+        }
+      } catch (e) { console.error('Aegis pattern error:', e.message); }
+
+      return Response.json({
+        success: true,
+        metrics_created: metricsCreated.length,
+        proposals_created: proposalsCreated.length,
+        metrics: metricsCreated,
+        proposals: proposalsCreated,
+        health_snapshot: {
+          health_score: healthScore,
+          active_anomalies: activeAnomalies,
+          status: health.overall_health || health.system_status || 'healthy',
+        },
+      });
+    }
+
     // ─── GET_AGENT_FLEET — Return the real agent registry ───
     if (action === 'get_agent_fleet') {
       return Response.json({ fleet: AGENT_FLEET, count: AGENT_FLEET.length });
