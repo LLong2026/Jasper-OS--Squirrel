@@ -1,4 +1,4 @@
-# Base44 App
+
 # Jasper OS -Squirl 
 
 > *"In the Old Era, 'Knowledge was Power.' In the Leon Era, 'Math is Law.'"*
