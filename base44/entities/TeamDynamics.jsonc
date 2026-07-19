@@ -1,0 +1,49 @@
+{
+  "name": "TeamDynamics",
+  "type": "object",
+  "properties": {
+    "collaboration_id": {
+      "type": "string",
+      "description": "Associated collaboration"
+    },
+    "communication_patterns": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Agent interaction frequencies and patterns"
+    },
+    "task_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Dependencies between agents' tasks"
+    },
+    "handoff_efficiency": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "How smoothly tasks are handed off"
+    },
+    "conflict_incidents": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of coordination conflicts"
+    },
+    "synergy_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Overall team synergy"
+    },
+    "bottleneck_agents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Agents causing delays"
+    }
+  },
+  "required": [
+    "collaboration_id"
+  ]
+}

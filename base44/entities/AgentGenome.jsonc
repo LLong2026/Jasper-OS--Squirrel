@@ -1,0 +1,66 @@
+{
+  "name": "AgentGenome",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent this genome belongs to"
+    },
+    "generation": {
+      "type": "number",
+      "default": 1,
+      "description": "Evolution generation number"
+    },
+    "instruction_dna": {
+      "type": "string",
+      "description": "Core instructions (mutable)"
+    },
+    "trait_weights": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Behavioral trait strengths"
+    },
+    "mutations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "History of mutations applied"
+    },
+    "fitness_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Overall performance score"
+    },
+    "parent_genome_id": {
+      "type": "string",
+      "description": "ID of genome this evolved from"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "safety_constraints": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Immutable safety rules"
+    },
+    "validation_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Golden Master validation results"
+    },
+    "last_validation_score": {
+      "type": "number",
+      "description": "Most recent validation score"
+    }
+  },
+  "required": [
+    "agent_name",
+    "instruction_dna"
+  ]
+}

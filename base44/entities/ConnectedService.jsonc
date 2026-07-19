@@ -1,0 +1,56 @@
+{
+  "name": "ConnectedService",
+  "type": "object",
+  "properties": {
+    "service_name": {
+      "type": "string",
+      "description": "Name of the connected service (e.g., Amazon, Uber, Netflix)"
+    },
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "commerce",
+        "travel",
+        "food",
+        "entertainment",
+        "finance",
+        "productivity",
+        "home_automation"
+      ],
+      "description": "Category of service"
+    },
+    "credentials": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Encrypted credentials/tokens"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "What actions this service supports"
+    },
+    "function_name": {
+      "type": "string",
+      "description": "Generated backend function for this service"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "error"
+      ],
+      "default": "active"
+    },
+    "last_used": {
+      "type": "number",
+      "description": "Timestamp of last usage"
+    }
+  },
+  "required": [
+    "service_name",
+    "service_type"
+  ]
+}

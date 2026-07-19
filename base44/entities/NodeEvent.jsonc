@@ -1,0 +1,41 @@
+{
+  "name": "NodeEvent",
+  "type": "object",
+  "properties": {
+    "node_id": {
+      "type": "string",
+      "description": "Node that generated this event"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Type of event"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Event payload"
+    },
+    "local_seq": {
+      "type": "number",
+      "description": "Local sequence number on node"
+    },
+    "merkle_leaf_hash": {
+      "type": "string",
+      "description": "Hash of Merkle leaf"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Node signature"
+    },
+    "synced": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether synced to control plane"
+    }
+  },
+  "required": [
+    "node_id",
+    "event_type",
+    "payload"
+  ]
+}

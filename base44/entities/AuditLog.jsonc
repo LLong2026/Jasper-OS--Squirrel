@@ -1,0 +1,89 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "description": "Type of event (e.g., agent_created, task_executed, error_occurred, urib_settlement)"
+    },
+    "actor": {
+      "type": "string",
+      "description": "User or system component that triggered the event"
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "Unix timestamp of the event"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "error",
+        "critical"
+      ],
+      "default": "info",
+      "description": "Event severity level"
+    },
+    "event_data": {
+      "type": "string",
+      "description": "JSON stringified event details"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address of the actor"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Browser/client user agent"
+    },
+    "record_type": {
+      "type": "string",
+      "description": "Sub-type for filtering (e.g., urib_settlement)"
+    },
+    "thread_anchor": {
+      "type": "string",
+      "description": "ThreadZero truth anchor (T*) for URIB settlements"
+    },
+    "c_stack": {
+      "type": "string",
+      "description": "URIB stack commitment hash"
+    },
+    "c_bridge": {
+      "type": "string",
+      "description": "URIB cross-rail bridge commitment hash"
+    },
+    "document_hash": {
+      "type": "string",
+      "description": "Canonical document hash (h_D)"
+    },
+    "semantic_hash": {
+      "type": "string",
+      "description": "Semantic graph hash (h_G)"
+    },
+    "did": {
+      "type": "string",
+      "description": "Decentralized Identifier of the initiator"
+    },
+    "rails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Rails traversed (ISO, BTC, XRP, CBDC)"
+    },
+    "event_count": {
+      "type": "number",
+      "description": "Number of ThreadZero events in the chain"
+    },
+    "created_at": {
+      "type": "number",
+      "description": "Creation timestamp"
+    }
+  },
+  "required": [
+    "event_type",
+    "actor",
+    "timestamp"
+  ]
+}

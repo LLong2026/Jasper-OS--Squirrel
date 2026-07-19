@@ -1,0 +1,55 @@
+{
+  "name": "Capsule",
+  "type": "object",
+  "properties": {
+    "capsule_id": {
+      "type": "string",
+      "description": "Unique capsule identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version"
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Capsule manifest with entrypoint, dependencies, etc"
+    },
+    "signed_by": {
+      "type": "string",
+      "description": "Signer identity"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Cryptographic signature"
+    },
+    "deployed_nodes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of node IDs where this is deployed"
+    },
+    "policy_type": {
+      "type": "string",
+      "enum": [
+        "scoring",
+        "safety",
+        "orchestration",
+        "compliance"
+      ],
+      "description": "Type of policy capsule"
+    }
+  },
+  "required": [
+    "capsule_id",
+    "name",
+    "version",
+    "manifest",
+    "signature"
+  ]
+}

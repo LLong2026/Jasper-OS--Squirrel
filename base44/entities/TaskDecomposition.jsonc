@@ -1,0 +1,84 @@
+{
+  "name": "TaskDecomposition",
+  "type": "object",
+  "properties": {
+    "decomposition_id": {
+      "type": "string",
+      "description": "Unique decomposition identifier"
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Agent performing decomposition"
+    },
+    "abstract_goal": {
+      "type": "string",
+      "description": "High-level abstract goal"
+    },
+    "concrete_subtasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "subtask_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "estimated_complexity": {
+            "type": "number"
+          },
+          "required_capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assigned_agent": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "blocked"
+            ]
+          }
+        }
+      },
+      "description": "Broken down executable subtasks"
+    },
+    "execution_plan": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "How subtasks should be executed"
+    },
+    "progress": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage completion"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "executing",
+        "completed",
+        "failed"
+      ],
+      "default": "planning"
+    }
+  },
+  "required": [
+    "agent_name",
+    "abstract_goal"
+  ]
+}

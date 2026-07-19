@@ -1,0 +1,81 @@
+{
+  "name": "PredictiveModel",
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "Unique model identifier"
+    },
+    "model_type": {
+      "type": "string",
+      "enum": [
+        "quality_decline",
+        "complexity_threshold",
+        "satisfaction_drop",
+        "performance_degradation",
+        "task_difficulty"
+      ],
+      "description": "Type of prediction model"
+    },
+    "source_agent": {
+      "type": "string",
+      "description": "Agent that developed this model"
+    },
+    "prediction_algorithm": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "The actual predictive logic/thresholds"
+    },
+    "accuracy_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.5,
+      "description": "Historical accuracy of predictions"
+    },
+    "predictions_made": {
+      "type": "number",
+      "default": 0,
+      "description": "Total predictions made"
+    },
+    "correct_predictions": {
+      "type": "number",
+      "default": 0,
+      "description": "Predictions that came true"
+    },
+    "false_positives": {
+      "type": "number",
+      "default": 0,
+      "description": "Predicted gaps that didn't materialize"
+    },
+    "skill_gap_prevented": {
+      "type": "number",
+      "default": 0,
+      "description": "Gaps successfully prevented via prediction"
+    },
+    "adopted_by_agents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Agents using this model"
+    },
+    "last_refined": {
+      "type": "number",
+      "description": "Timestamp of last refinement"
+    },
+    "confidence_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.75,
+      "description": "Minimum confidence to trigger action"
+    }
+  },
+  "required": [
+    "model_type",
+    "source_agent",
+    "prediction_algorithm"
+  ]
+}

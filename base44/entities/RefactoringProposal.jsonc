@@ -1,0 +1,72 @@
+{
+  "name": "RefactoringProposal",
+  "type": "object",
+  "properties": {
+    "file_path": {
+      "type": "string",
+      "description": "File to be refactored"
+    },
+    "proposal_type": {
+      "type": "string",
+      "enum": [
+        "optimization",
+        "security",
+        "maintainability",
+        "performance",
+        "bug_fix"
+      ],
+      "description": "Type of refactoring"
+    },
+    "current_issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Issues identified in current code"
+    },
+    "proposed_changes": {
+      "type": "string",
+      "description": "Detailed explanation of proposed changes"
+    },
+    "expected_improvements": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Expected benefits"
+    },
+    "risk_assessment": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "description": "Risk level of applying this refactor"
+    },
+    "priority_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Urgency of this refactor"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "approved",
+        "applied",
+        "rejected"
+      ],
+      "default": "proposed"
+    },
+    "applied_version_id": {
+      "type": "string",
+      "description": "CodeVersion ID when applied"
+    }
+  },
+  "required": [
+    "file_path",
+    "proposal_type",
+    "current_issues",
+    "proposed_changes"
+  ]
+}

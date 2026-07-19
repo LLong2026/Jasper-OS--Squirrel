@@ -1,0 +1,71 @@
+{
+  "name": "AuditHolonomy",
+  "type": "object",
+  "properties": {
+    "cycle_id": {
+      "type": "string",
+      "description": "Execution cycle identifier"
+    },
+    "invariant_hash": {
+      "type": "string",
+      "description": "SHA-256 of the cycle invariant state (topology + substrate)"
+    },
+    "topology_hash": {
+      "type": "string",
+      "description": "SHA-256 of the active operator set \u2014 stable when topology is unchanged"
+    },
+    "parent_hash": {
+      "type": "string",
+      "description": "Invariant hash of the previous cycle"
+    },
+    "drift_score": {
+      "type": "number",
+      "description": "Topological drift (Jaccard distance) vs previous cycle, 0-1"
+    },
+    "substrate_drift": {
+      "type": "number",
+      "description": "Substrate bit-drift vs previous cycle invariant hash, 0-1"
+    },
+    "continuity_status": {
+      "type": "string",
+      "enum": [
+        "continuous",
+        "drifted",
+        "broken"
+      ],
+      "default": "continuous",
+      "description": "Topological continuity classification"
+    },
+    "holonomy_pass": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the active operator loop returns to identity (balanced)"
+    },
+    "holonomy_group": {
+      "type": "string",
+      "description": "Holonomy group element: 'identity' when pass, else 'violation'"
+    },
+    "active_operators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Active topological operators traversed this cycle"
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Unpaired operators breaking the holonomy loop"
+    },
+    "threshold": {
+      "type": "number",
+      "description": "Drift threshold applied for this audit"
+    }
+  },
+  "required": [
+    "cycle_id",
+    "invariant_hash"
+  ]
+}

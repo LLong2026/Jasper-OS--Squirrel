@@ -1,0 +1,64 @@
+{
+  "name": "AgentToolbelt",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent this toolbelt belongs to"
+    },
+    "available_tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "function_name": {
+            "type": "string"
+          },
+          "skill_type": {
+            "type": "string"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "added_date": {
+            "type": "number"
+          },
+          "usage_count": {
+            "type": "number"
+          },
+          "success_rate": {
+            "type": "number"
+          },
+          "auto_integrated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "default": [],
+      "description": "Tools currently available to this agent"
+    },
+    "tool_performance": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Performance metrics per tool"
+    },
+    "pending_integrations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tools awaiting integration"
+    },
+    "last_optimized": {
+      "type": "number",
+      "description": "Last toolbelt optimization timestamp"
+    }
+  },
+  "required": [
+    "agent_name"
+  ]
+}

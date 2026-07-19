@@ -1,0 +1,42 @@
+{
+  "name": "AgentPerformance",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Name of the agent"
+    },
+    "total_tasks": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of tasks handled"
+    },
+    "successful_tasks": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of successful tasks"
+    },
+    "avg_execution_time_ms": {
+      "type": "number",
+      "default": 0,
+      "description": "Average execution time"
+    },
+    "success_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Success rate percentage"
+    },
+    "specialties_performance": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Performance breakdown by specialty"
+    },
+    "last_updated": {
+      "type": "number",
+      "description": "Timestamp of last update"
+    }
+  },
+  "required": [
+    "agent_name"
+  ]
+}

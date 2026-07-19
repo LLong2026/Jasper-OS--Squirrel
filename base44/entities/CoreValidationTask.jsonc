@@ -1,0 +1,34 @@
+{
+  "name": "CoreValidationTask",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent this validation task is for"
+    },
+    "task_description": {
+      "type": "string",
+      "description": "What the agent must accomplish"
+    },
+    "expected_outcome": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Expected result or behavior"
+    },
+    "is_critical": {
+      "type": "boolean",
+      "default": true,
+      "description": "Must pass for agent to remain active"
+    },
+    "validation_frequency": {
+      "type": "number",
+      "default": 10,
+      "description": "Run every N generations"
+    }
+  },
+  "required": [
+    "agent_name",
+    "task_description",
+    "expected_outcome"
+  ]
+}

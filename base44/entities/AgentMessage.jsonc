@@ -1,0 +1,65 @@
+{
+  "name": "AgentMessage",
+  "type": "object",
+  "properties": {
+    "from_agent": {
+      "type": "string",
+      "description": "Agent sending the message"
+    },
+    "to_agents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Target agents (empty = broadcast)"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "intelligence",
+        "conflict_alert",
+        "task_proposal",
+        "consensus_request",
+        "capability_broadcast",
+        "status_update"
+      ],
+      "description": "Type of communication"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Message content"
+    },
+    "requires_response": {
+      "type": "boolean",
+      "default": false
+    },
+    "thread_id": {
+      "type": "string",
+      "description": "Conversation thread"
+    },
+    "acknowledged_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Agents who acknowledged this message"
+    }
+  },
+  "required": [
+    "from_agent",
+    "message_type",
+    "payload"
+  ]
+}

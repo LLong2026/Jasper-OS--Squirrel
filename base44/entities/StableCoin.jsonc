@@ -1,0 +1,76 @@
+{
+  "name": "StableCoin",
+  "type": "object",
+  "properties": {
+    "coin_id": {
+      "type": "string",
+      "description": "Unique stable coin identifier"
+    },
+    "coin_name": {
+      "type": "string",
+      "description": "Name of the stable coin (e.g., Texas Digital Dollar)"
+    },
+    "symbol": {
+      "type": "string",
+      "description": "Currency symbol (e.g., TXD, TXUSD)"
+    },
+    "total_supply": {
+      "type": "number",
+      "description": "Total coins in circulation"
+    },
+    "reserve_backing": {
+      "type": "number",
+      "description": "Total reserve value backing this coin"
+    },
+    "backing_type": {
+      "type": "string",
+      "enum": [
+        "gold",
+        "silver",
+        "mixed_metals",
+        "fiat",
+        "commodity_basket"
+      ],
+      "description": "Type of reserve backing"
+    },
+    "peg_ratio": {
+      "type": "number",
+      "default": 1.0,
+      "description": "Pegged value (e.g., 1.0 = 1 USD)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "auditing"
+      ],
+      "default": "active",
+      "description": "Current operational status"
+    },
+    "compliance_status": {
+      "type": "string",
+      "enum": [
+        "compliant",
+        "under_review",
+        "non_compliant"
+      ],
+      "default": "compliant"
+    },
+    "audit_frequency_days": {
+      "type": "number",
+      "default": 30,
+      "description": "How often audits occur"
+    },
+    "last_audit_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last audit timestamp"
+    }
+  },
+  "required": [
+    "coin_name",
+    "symbol",
+    "backing_type"
+  ]
+}

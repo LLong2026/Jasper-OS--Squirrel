@@ -1,0 +1,60 @@
+{
+  "name": "KnowledgeNode",
+  "type": "object",
+  "properties": {
+    "node_type": {
+      "type": "string",
+      "enum": [
+        "person",
+        "project",
+        "concept",
+        "location",
+        "organization",
+        "event",
+        "document"
+      ],
+      "description": "Type of knowledge node"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of this node"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of this node"
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Node-specific properties"
+    },
+    "connections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "target_node_id": {
+            "type": "string"
+          },
+          "relationship": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "number"
+          }
+        }
+      },
+      "default": [],
+      "description": "Connections to other nodes"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Additional metadata"
+    }
+  },
+  "required": [
+    "node_type",
+    "name"
+  ]
+}

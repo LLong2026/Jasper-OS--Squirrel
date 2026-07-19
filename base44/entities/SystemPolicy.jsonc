@@ -1,0 +1,46 @@
+{
+  "name": "SystemPolicy",
+  "type": "object",
+  "properties": {
+    "policy_name": {
+      "type": "string",
+      "description": "Name of the system policy"
+    },
+    "policy_category": {
+      "type": "string",
+      "enum": [
+        "resource_allocation",
+        "agent_selection",
+        "load_balancing",
+        "priority_adjustment"
+      ],
+      "description": "Category of system policy"
+    },
+    "current_strategy": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Current strategy configuration"
+    },
+    "performance_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Metrics that triggered this policy"
+    },
+    "predicted_load": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Predicted future system load"
+    },
+    "effectiveness_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "How effective this policy is"
+    }
+  },
+  "required": [
+    "policy_name",
+    "policy_category",
+    "current_strategy"
+  ]
+}

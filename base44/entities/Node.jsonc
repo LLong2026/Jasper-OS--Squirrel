@@ -1,0 +1,68 @@
+{
+  "name": "Node",
+  "type": "object",
+  "properties": {
+    "node_id": {
+      "type": "string",
+      "description": "Unique identifier for the node"
+    },
+    "node_type": {
+      "type": "string",
+      "enum": [
+        "docker",
+        "kubernetes",
+        "systemd",
+        "serverless",
+        "edge"
+      ],
+      "description": "Deployment type of the node"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "registering",
+        "active",
+        "offline",
+        "degraded",
+        "terminated"
+      ],
+      "default": "registering"
+    },
+    "public_key": {
+      "type": "string",
+      "description": "Node's public key for mTLS"
+    },
+    "last_heartbeat": {
+      "type": "number",
+      "description": "Timestamp of last heartbeat"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Node capabilities (GPU, LLM_PROXY, etc)"
+    },
+    "installed_plugins": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "List of installed plugins"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Current node metrics"
+    },
+    "merkle_root_current": {
+      "type": "string",
+      "description": "Current Merkle root hash"
+    }
+  },
+  "required": [
+    "node_id",
+    "node_type",
+    "public_key"
+  ]
+}

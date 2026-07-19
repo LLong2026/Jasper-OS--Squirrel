@@ -1,0 +1,69 @@
+{
+  "name": "FineTuningJob",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent initiating fine-tuning"
+    },
+    "base_model": {
+      "type": "string",
+      "description": "Base model to fine-tune (e.g., gpt-3.5-turbo)"
+    },
+    "provider": {
+      "type": "string",
+      "description": "Model provider (openai, anthropic, etc)"
+    },
+    "training_data_source": {
+      "type": "string",
+      "enum": [
+        "performance_history",
+        "failed_tasks",
+        "user_feedback",
+        "synthetic_generation"
+      ],
+      "description": "Source of training data"
+    },
+    "training_examples_count": {
+      "type": "number",
+      "description": "Number of training examples"
+    },
+    "target_improvement": {
+      "type": "string",
+      "description": "What the fine-tuning aims to improve"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "preparing",
+        "training",
+        "validating",
+        "deployed",
+        "failed"
+      ],
+      "default": "preparing"
+    },
+    "fine_tuned_model_id": {
+      "type": "string",
+      "description": "ID of the fine-tuned model"
+    },
+    "validation_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Performance metrics after fine-tuning"
+    },
+    "cost_usd": {
+      "type": "number",
+      "description": "Cost of fine-tuning job"
+    },
+    "created_from_proposal": {
+      "type": "string",
+      "description": "ImprovementProposal ID that triggered this"
+    }
+  },
+  "required": [
+    "agent_name",
+    "base_model",
+    "provider"
+  ]
+}

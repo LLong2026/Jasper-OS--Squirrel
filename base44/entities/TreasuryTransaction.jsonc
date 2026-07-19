@@ -1,0 +1,76 @@
+{
+  "name": "TreasuryTransaction",
+  "type": "object",
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "description": "Unique transaction identifier"
+    },
+    "from_account": {
+      "type": "string",
+      "description": "Source account ID"
+    },
+    "to_account": {
+      "type": "string",
+      "description": "Destination account ID"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Transaction amount"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD",
+      "description": "Transaction currency"
+    },
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "transfer",
+        "deposit",
+        "withdrawal",
+        "fee",
+        "interest"
+      ],
+      "description": "Type of transaction"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "reversed"
+      ],
+      "default": "pending",
+      "description": "Transaction status"
+    },
+    "initiated_by": {
+      "type": "string",
+      "description": "User who initiated the transaction"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "User who approved the transaction"
+    },
+    "description": {
+      "type": "string",
+      "description": "Transaction description"
+    },
+    "blockchain_anchor": {
+      "type": "string",
+      "description": "Link to blockchain record"
+    },
+    "execution_timestamp": {
+      "type": "number",
+      "description": "When transaction was executed"
+    }
+  },
+  "required": [
+    "from_account",
+    "to_account",
+    "amount",
+    "transaction_type"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "name": "LearningSignal",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "ID of the event that generated this learning signal"
+    },
+    "task_type": {
+      "type": "string",
+      "description": "Classification of the task"
+    },
+    "agents_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Names of agents that handled the task"
+    },
+    "success": {
+      "type": "boolean",
+      "description": "Whether the task was successful"
+    },
+    "execution_time_ms": {
+      "type": "number",
+      "description": "How long the task took"
+    },
+    "user_feedback": {
+      "type": "string",
+      "enum": [
+        "positive",
+        "negative",
+        "neutral"
+      ],
+      "default": "neutral"
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Extracted features from the task"
+    },
+    "outcome_quality": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Quality score of the outcome"
+    }
+  },
+  "required": [
+    "event_id",
+    "task_type",
+    "agents_used",
+    "success"
+  ]
+}

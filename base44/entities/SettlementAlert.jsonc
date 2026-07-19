@@ -1,0 +1,73 @@
+{
+  "name": "SettlementAlert",
+  "type": "object",
+  "properties": {
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "bottleneck",
+        "failure",
+        "stall",
+        "partial_rail_coverage",
+        "retry_storm"
+      ],
+      "description": "Type of settlement anomaly detected"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "warning",
+        "critical"
+      ],
+      "default": "warning",
+      "description": "Alert severity"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short alert headline"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed explanation of the anomaly"
+    },
+    "related_settlement_id": {
+      "type": "string",
+      "description": "AuditLog id of the related URIB settlement"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Actor that triggered the settlement"
+    },
+    "thread_anchor": {
+      "type": "string",
+      "description": "ThreadZero anchor (T*) of the related settlement"
+    },
+    "c_stack": {
+      "type": "string",
+      "description": "Stack commitment of the related settlement"
+    },
+    "detected_at": {
+      "type": "number",
+      "description": "Timestamp the alert was raised"
+    },
+    "dedupe_key": {
+      "type": "string",
+      "description": "Composite key to prevent duplicate active alerts"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "acknowledged",
+        "resolved"
+      ],
+      "default": "active",
+      "description": "Whether the alert is still active"
+    }
+  },
+  "required": [
+    "alert_type",
+    "severity",
+    "title"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "Partnership",
+  "type": "object",
+  "properties": {
+    "institution": {
+      "type": "string",
+      "description": "Name of the research institution (e.g., MIT CSAIL)."
+    },
+    "researchArea": {
+      "type": "string",
+      "description": "Primary field of collaboration (e.g., Quantum Computing)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Prospect",
+        "Contacted",
+        "In Discussion",
+        "Active"
+      ],
+      "default": "Prospect",
+      "description": "Current stage of the partnership engagement."
+    },
+    "keyContactName": {
+      "type": "string",
+      "description": "Name of the primary contact at the institution."
+    },
+    "keyContactEmail": {
+      "type": "string",
+      "description": "Email of the primary contact."
+    },
+    "valueToPartner": {
+      "type": "string",
+      "description": "What Friday's AI brings to them (e.g., Autonomous algorithm design)."
+    },
+    "resourcesFromPartner": {
+      "type": "string",
+      "description": "What we need from them (e.g., Access to Quantum Computer)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Running log of notes and next steps."
+    }
+  },
+  "required": [
+    "institution",
+    "researchArea",
+    "status"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The unique name of the Hyper-Scribe project."
+    },
+    "description": {
+      "type": "string",
+      "description": "A detailed description of the project's goals and what the Covenant Satoshis will represent or do."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Planning",
+        "Active",
+        "Archived"
+      ],
+      "default": "Planning",
+      "description": "The current status of the project."
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

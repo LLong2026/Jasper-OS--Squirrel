@@ -1,0 +1,74 @@
+{
+  "name": "ComplianceRecord",
+  "type": "object",
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "description": "Unique compliance record identifier"
+    },
+    "coin_id": {
+      "type": "string",
+      "description": "StableCoin being audited"
+    },
+    "audit_type": {
+      "type": "string",
+      "enum": [
+        "reserve_audit",
+        "regulatory_review",
+        "security_audit",
+        "compliance_check"
+      ],
+      "description": "Type of compliance check"
+    },
+    "auditor": {
+      "type": "string",
+      "description": "Entity performing the audit"
+    },
+    "audit_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "findings": {
+      "type": "string",
+      "description": "Summary of audit findings"
+    },
+    "compliance_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Compliance rating (0-100)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "conditional_pass",
+        "under_review"
+      ],
+      "description": "Audit result"
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Recommended actions"
+    },
+    "report_url": {
+      "type": "string",
+      "description": "Link to full audit report"
+    },
+    "next_audit_due": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "coin_id",
+    "audit_type",
+    "auditor",
+    "compliance_score",
+    "status"
+  ]
+}

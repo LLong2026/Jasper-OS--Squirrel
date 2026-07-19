@@ -1,0 +1,42 @@
+{
+  "name": "ResourcePool",
+  "type": "object",
+  "properties": {
+    "resource_type": {
+      "type": "string",
+      "enum": [
+        "compute",
+        "memory",
+        "storage",
+        "network",
+        "llm_tokens",
+        "gpu"
+      ],
+      "description": "Type of resource"
+    },
+    "total_capacity": {
+      "type": "number",
+      "description": "Total available capacity"
+    },
+    "allocated": {
+      "type": "number",
+      "default": 0,
+      "description": "Currently allocated amount"
+    },
+    "available": {
+      "type": "number",
+      "description": "Available amount"
+    },
+    "allocations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Current resource allocations"
+    }
+  },
+  "required": [
+    "resource_type",
+    "total_capacity"
+  ]
+}

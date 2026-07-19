@@ -1,0 +1,43 @@
+{
+  "name": "CollaborationHistory",
+  "type": "object",
+  "properties": {
+    "agent_combination": {
+      "type": "string",
+      "description": "Sorted comma-separated agent names"
+    },
+    "formation_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this combination formed"
+    },
+    "success_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Successful collaborations"
+    },
+    "avg_performance_score": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_task_completion_time": {
+      "type": "number",
+      "default": 0
+    },
+    "task_types_handled": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Types of tasks this combo handled"
+    },
+    "success_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Historical success rate percentage"
+    }
+  },
+  "required": [
+    "agent_combination"
+  ]
+}

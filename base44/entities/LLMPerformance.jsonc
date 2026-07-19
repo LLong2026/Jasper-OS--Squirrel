@@ -1,0 +1,71 @@
+{
+  "name": "LLMPerformance",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "description": "LLM provider (openai, anthropic, google, etc)"
+    },
+    "model": {
+      "type": "string",
+      "description": "Specific model name"
+    },
+    "task_type": {
+      "type": "string",
+      "description": "Type of task performed"
+    },
+    "total_requests": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of requests"
+    },
+    "successful_requests": {
+      "type": "number",
+      "default": 0
+    },
+    "failed_requests": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_response_time_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_quality_score": {
+      "type": "number",
+      "default": 0,
+      "description": "User feedback quality score (0-10)"
+    },
+    "total_tokens_used": {
+      "type": "number",
+      "default": 0
+    },
+    "total_cost_usd": {
+      "type": "number",
+      "default": 0
+    },
+    "success_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage of successful requests"
+    },
+    "performance_rank": {
+      "type": "number",
+      "default": 50,
+      "description": "Dynamic ranking score (0-100)"
+    },
+    "last_failure_reason": {
+      "type": "string",
+      "description": "Most recent failure error message"
+    },
+    "specialization_scores": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Performance scores by specialization domain"
+    }
+  },
+  "required": [
+    "provider",
+    "model"
+  ]
+}

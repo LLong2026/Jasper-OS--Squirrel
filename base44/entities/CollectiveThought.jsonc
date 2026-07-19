@@ -1,0 +1,64 @@
+{
+  "name": "CollectiveThought",
+  "type": "object",
+  "properties": {
+    "thought_id": {
+      "type": "string",
+      "description": "Unique thought identifier"
+    },
+    "objective": {
+      "type": "string",
+      "description": "What the collective is trying to achieve"
+    },
+    "contributing_nodes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Nodes contributing to this thought"
+    },
+    "emergent_solution": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Solution that emerged from collective processing"
+    },
+    "convergence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "How unified the collective is on this solution"
+    },
+    "processing_time_ms": {
+      "type": "number",
+      "description": "How long collective took to converge"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "forming",
+        "processing",
+        "converged",
+        "executed",
+        "divergent"
+      ],
+      "default": "forming"
+    },
+    "activated_memories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Global memories used in this thought"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Collective confidence in solution"
+    }
+  },
+  "required": [
+    "objective"
+  ]
+}

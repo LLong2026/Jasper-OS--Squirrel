@@ -1,0 +1,62 @@
+{
+  "name": "KnowledgeBase",
+  "type": "object",
+  "properties": {
+    "document_id": {
+      "type": "string",
+      "description": "Unique document identifier"
+    },
+    "title": {
+      "type": "string",
+      "description": "Document title"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full document content"
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "documentation",
+        "code_example",
+        "best_practice",
+        "troubleshooting",
+        "architecture",
+        "learned_experience"
+      ],
+      "description": "Type of knowledge"
+    },
+    "embedding_vector": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "Vector embedding for similarity search"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Searchable tags"
+    },
+    "source": {
+      "type": "string",
+      "description": "Where this knowledge came from"
+    },
+    "relevance_score": {
+      "type": "number",
+      "default": 0,
+      "description": "How often this knowledge is useful"
+    },
+    "last_accessed": {
+      "type": "number",
+      "description": "Timestamp of last access"
+    }
+  },
+  "required": [
+    "document_id",
+    "content",
+    "content_type"
+  ]
+}

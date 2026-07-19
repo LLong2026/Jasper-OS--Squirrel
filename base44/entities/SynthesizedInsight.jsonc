@@ -1,0 +1,89 @@
+{
+  "name": "SynthesizedInsight",
+  "type": "object",
+  "properties": {
+    "insight_id": {
+      "type": "string",
+      "description": "Unique insight identifier"
+    },
+    "insight_title": {
+      "type": "string",
+      "description": "Title of the synthesized insight"
+    },
+    "insight_content": {
+      "type": "string",
+      "description": "The synthesized knowledge or principle"
+    },
+    "contributing_agents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Agents that contributed to this synthesis"
+    },
+    "source_knowledge": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source_type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "contribution": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Sources of knowledge used in synthesis"
+    },
+    "synthesis_method": {
+      "type": "string",
+      "enum": [
+        "collaborative_reasoning",
+        "pattern_extraction",
+        "consensus_building",
+        "cross_pollination"
+      ],
+      "description": "How the insight was synthesized"
+    },
+    "novelty_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "How novel/unique this insight is"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Collective confidence in this insight"
+    },
+    "validated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether insight has been validated"
+    },
+    "applications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Potential applications of this insight"
+    },
+    "related_insights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Related synthesized insights"
+    }
+  },
+  "required": [
+    "insight_title",
+    "insight_content",
+    "contributing_agents"
+  ]
+}

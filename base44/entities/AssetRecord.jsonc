@@ -1,0 +1,87 @@
+{
+  "name": "AssetRecord",
+  "type": "object",
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "Unique asset identifier (e.g., TX-GOLD-Bar-5092)"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "gold",
+        "silver",
+        "platinum",
+        "other"
+      ],
+      "description": "Type of precious metal or asset"
+    },
+    "weight": {
+      "type": "number",
+      "description": "Weight of asset in troy ounces"
+    },
+    "purity": {
+      "type": "number",
+      "description": "Purity percentage (e.g., 99.99 for .9999 fine)"
+    },
+    "owner_did": {
+      "type": "string",
+      "description": "Decentralized Identifier of the asset owner"
+    },
+    "satoshi_anchor": {
+      "type": "string",
+      "description": "Bitcoin transaction ID linking to Satoshi Covenant"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the asset"
+    },
+    "vault_location": {
+      "type": "string",
+      "description": "Physical vault location where asset is stored"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL to the asset's PDF document in Base44 storage (from Core.UploadFile)"
+    },
+    "is_encrypted": {
+      "type": "boolean",
+      "default": false,
+      "description": "UI flag to simulate encrypted state (visual only)"
+    },
+    "gps_device_id": {
+      "type": "string",
+      "description": "GPS tracking device ID linked to this asset"
+    },
+    "last_known_location": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "speed": {
+          "type": "number"
+        },
+        "heading": {
+          "type": "number"
+        },
+        "timestamp": {
+          "type": "number"
+        }
+      },
+      "description": "Last known GPS coordinates and tracking data"
+    },
+    "last_location_update": {
+      "type": "number",
+      "description": "Timestamp of last GPS location update"
+    }
+  },
+  "required": [
+    "asset_id",
+    "asset_type",
+    "weight"
+  ]
+}

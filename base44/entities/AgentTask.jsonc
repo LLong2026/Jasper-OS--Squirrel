@@ -1,0 +1,77 @@
+{
+  "name": "AgentTask",
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "Unique task identifier"
+    },
+    "initiated_by": {
+      "type": "string",
+      "description": "Agent that initiated this task"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "monitoring",
+        "optimization",
+        "healing",
+        "learning",
+        "collaboration"
+      ],
+      "description": "Type of autonomous task"
+    },
+    "priority": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 10,
+      "default": 5,
+      "description": "Task priority"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "assigned_agents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Agents assigned to this task"
+    },
+    "required_resources": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Resources required for task"
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Task execution result"
+    },
+    "feedback_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Performance feedback score"
+    },
+    "self_corrections": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Self-correction actions taken"
+    }
+  },
+  "required": [
+    "initiated_by",
+    "task_type"
+  ]
+}

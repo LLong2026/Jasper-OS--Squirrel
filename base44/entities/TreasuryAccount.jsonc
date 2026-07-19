@@ -1,0 +1,60 @@
+{
+  "name": "TreasuryAccount",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "description": "Unique account identifier"
+    },
+    "account_name": {
+      "type": "string",
+      "description": "Name of the treasury account"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "operating",
+        "reserve",
+        "investment",
+        "escrow"
+      ],
+      "description": "Type of treasury account"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD",
+      "description": "Account currency"
+    },
+    "balance": {
+      "type": "number",
+      "description": "Current balance"
+    },
+    "available_balance": {
+      "type": "number",
+      "description": "Available balance (excluding holds)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "frozen",
+        "closed"
+      ],
+      "default": "active",
+      "description": "Account status"
+    },
+    "custodian": {
+      "type": "string",
+      "description": "Financial institution holding the account"
+    },
+    "blockchain_anchor": {
+      "type": "string",
+      "description": "Link to blockchain record"
+    }
+  },
+  "required": [
+    "account_id",
+    "account_name",
+    "account_type"
+  ]
+}

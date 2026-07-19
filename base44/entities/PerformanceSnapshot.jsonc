@@ -1,0 +1,55 @@
+{
+  "name": "PerformanceSnapshot",
+  "type": "object",
+  "properties": {
+    "snapshot_type": {
+      "type": "string",
+      "enum": [
+        "baseline",
+        "post_modification",
+        "rollback"
+      ],
+      "description": "Type of snapshot"
+    },
+    "code_version_id": {
+      "type": "string",
+      "description": "Associated code version"
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "avg_response_time_ms": {
+          "type": "number"
+        },
+        "success_rate": {
+          "type": "number"
+        },
+        "error_count": {
+          "type": "number"
+        },
+        "memory_usage_mb": {
+          "type": "number"
+        },
+        "llm_token_usage": {
+          "type": "number"
+        }
+      }
+    },
+    "comparison_to_baseline": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Delta from baseline performance"
+    },
+    "anomalies_detected": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Performance issues detected"
+    }
+  },
+  "required": [
+    "snapshot_type",
+    "metrics"
+  ]
+}

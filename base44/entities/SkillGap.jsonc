@@ -1,0 +1,76 @@
+{
+  "name": "SkillGap",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent with the skill gap"
+    },
+    "missing_skill": {
+      "type": "string",
+      "description": "The skill/specialization that's missing"
+    },
+    "identified_by": {
+      "type": "string",
+      "enum": [
+        "task_failure",
+        "predictive_analysis",
+        "user_request",
+        "peer_comparison"
+      ],
+      "description": "How the gap was identified"
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "description": "How urgently this skill is needed"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Task IDs or data supporting this gap"
+    },
+    "learning_plan": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Proposed plan to acquire this skill"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "identified",
+        "learning",
+        "acquired",
+        "validated"
+      ],
+      "default": "identified"
+    },
+    "acquisition_method": {
+      "type": "string",
+      "enum": [
+        "fine_tuning",
+        "prompt_engineering",
+        "tool_integration",
+        "agent_collaboration"
+      ],
+      "description": "How to acquire this skill"
+    },
+    "estimated_learning_time": {
+      "type": "number",
+      "description": "Estimated time to acquire skill in hours"
+    }
+  },
+  "required": [
+    "agent_name",
+    "missing_skill",
+    "identified_by",
+    "urgency"
+  ]
+}

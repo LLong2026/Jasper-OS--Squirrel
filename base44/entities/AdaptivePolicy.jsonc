@@ -1,0 +1,49 @@
+{
+  "name": "AdaptivePolicy",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent this policy applies to"
+    },
+    "policy_type": {
+      "type": "string",
+      "enum": [
+        "confidence_threshold",
+        "retry_mechanism",
+        "timeout_duration",
+        "resource_request",
+        "collaboration_preference"
+      ],
+      "description": "Type of adaptive policy"
+    },
+    "current_value": {
+      "type": "number",
+      "description": "Current parameter value"
+    },
+    "default_value": {
+      "type": "number",
+      "description": "Default parameter value"
+    },
+    "adjustment_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "History of adjustments made"
+    },
+    "performance_correlation": {
+      "type": "number",
+      "description": "How this policy affects performance"
+    },
+    "last_adjusted": {
+      "type": "number",
+      "description": "Timestamp of last adjustment"
+    }
+  },
+  "required": [
+    "agent_name",
+    "policy_type",
+    "current_value"
+  ]
+}

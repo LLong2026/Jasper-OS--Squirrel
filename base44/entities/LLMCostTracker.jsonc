@@ -1,0 +1,50 @@
+{
+  "name": "LLMCostTracker",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of tracking (YYYY-MM-DD)"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "total_requests": {
+      "type": "number",
+      "default": 0
+    },
+    "total_tokens": {
+      "type": "number",
+      "default": 0
+    },
+    "input_tokens": {
+      "type": "number",
+      "default": 0
+    },
+    "output_tokens": {
+      "type": "number",
+      "default": 0
+    },
+    "total_cost_usd": {
+      "type": "number",
+      "default": 0
+    },
+    "cost_per_request": {
+      "type": "number",
+      "default": 0
+    },
+    "budget_remaining": {
+      "type": "number",
+      "description": "Remaining budget for this provider"
+    }
+  },
+  "required": [
+    "date",
+    "provider",
+    "model"
+  ]
+}

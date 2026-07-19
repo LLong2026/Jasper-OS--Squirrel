@@ -1,0 +1,82 @@
+{
+  "name": "ToolRequest",
+  "type": "object",
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "Unique request identifier"
+    },
+    "requesting_agent": {
+      "type": "string",
+      "description": "Agent requesting the tool"
+    },
+    "skill_gap_id": {
+      "type": "string",
+      "description": "Associated SkillGap record ID"
+    },
+    "tool_name": {
+      "type": "string",
+      "description": "Requested tool name"
+    },
+    "tool_purpose": {
+      "type": "string",
+      "description": "What the tool should accomplish"
+    },
+    "required_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Specific capabilities needed"
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "searching",
+        "developing",
+        "testing",
+        "deployed",
+        "rejected"
+      ],
+      "default": "requested"
+    },
+    "existing_tool_found": {
+      "type": "string",
+      "description": "ID of existing tool that meets needs"
+    },
+    "tool_function_name": {
+      "type": "string",
+      "description": "Backend function name once created"
+    },
+    "test_results": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Results from tool testing"
+    },
+    "integrated_at": {
+      "type": "number",
+      "description": "Timestamp of successful integration"
+    },
+    "performance_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Performance data after deployment"
+    }
+  },
+  "required": [
+    "requesting_agent",
+    "tool_name",
+    "tool_purpose"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "name": "TaskForce",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Task force identifier"
+    },
+    "objective": {
+      "type": "string",
+      "description": "Primary goal of this task force"
+    },
+    "formation_reason": {
+      "type": "string",
+      "description": "Why this task force was created"
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "agent_name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "responsibilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Task force members and their roles"
+    },
+    "lead_agent": {
+      "type": "string",
+      "description": "Coordinating agent"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "forming",
+        "active",
+        "completed",
+        "dissolved"
+      ],
+      "default": "forming"
+    },
+    "shared_context": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Intelligence and data shared among members"
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Consensus decisions made"
+    },
+    "conflicts_resolved": {
+      "type": "number",
+      "default": 0
+    },
+    "success_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Task force effectiveness"
+    },
+    "dissolved_at": {
+      "type": "number",
+      "description": "When task force was dissolved"
+    }
+  },
+  "required": [
+    "name",
+    "objective",
+    "members",
+    "lead_agent"
+  ]
+}

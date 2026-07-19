@@ -1,0 +1,23 @@
+{
+  "name": "DataAnchor",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "The ID of the project this data anchor belongs to."
+    },
+    "data_payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "The JSON object representing the data to be anchored. This data will be part of a Merkle tree."
+    },
+    "leaf_hash": {
+      "type": "string",
+      "description": "The cryptographic hash of the data payload, representing a leaf in the Merkle tree."
+    }
+  },
+  "required": [
+    "project_id",
+    "data_payload"
+  ]
+}

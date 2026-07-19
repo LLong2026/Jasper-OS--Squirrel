@@ -1,0 +1,65 @@
+{
+  "name": "CodeVersion",
+  "type": "object",
+  "properties": {
+    "file_path": {
+      "type": "string",
+      "description": "Path to the modified file"
+    },
+    "version_number": {
+      "type": "number",
+      "description": "Sequential version number"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full content at this version"
+    },
+    "content_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of content"
+    },
+    "change_description": {
+      "type": "string",
+      "description": "What was changed and why"
+    },
+    "modified_by": {
+      "type": "string",
+      "enum": [
+        "human",
+        "wednesday",
+        "system"
+      ],
+      "description": "Who made this change"
+    },
+    "modification_reason": {
+      "type": "string",
+      "description": "Rationale for the modification"
+    },
+    "impact_assessment": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Predicted impact of this change"
+    },
+    "performance_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Performance after this change"
+    },
+    "rollback_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Times this version was rolled back to"
+    },
+    "is_current": {
+      "type": "boolean",
+      "default": true,
+      "description": "Is this the active version"
+    }
+  },
+  "required": [
+    "file_path",
+    "version_number",
+    "content",
+    "content_hash"
+  ]
+}

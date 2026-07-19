@@ -1,0 +1,75 @@
+{
+  "name": "ReasoningChain",
+  "type": "object",
+  "properties": {
+    "chain_id": {
+      "type": "string",
+      "description": "Unique reasoning chain identifier"
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Agent performing reasoning"
+    },
+    "original_query": {
+      "type": "string",
+      "description": "Original problem to solve"
+    },
+    "reasoning_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_number": {
+            "type": "number"
+          },
+          "hypothesis": {
+            "type": "string"
+          },
+          "reasoning": {
+            "type": "string"
+          },
+          "knowledge_retrieved": {
+            "type": "array"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "validation": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Chain of logical reasoning steps"
+    },
+    "final_conclusion": {
+      "type": "string",
+      "description": "Final reasoning conclusion"
+    },
+    "confidence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Overall confidence in conclusion"
+    },
+    "knowledge_sources_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Document IDs consulted"
+    },
+    "reasoning_time_ms": {
+      "type": "number",
+      "description": "Time taken to reason"
+    },
+    "validated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether conclusion was validated"
+    }
+  },
+  "required": [
+    "agent_name",
+    "original_query"
+  ]
+}

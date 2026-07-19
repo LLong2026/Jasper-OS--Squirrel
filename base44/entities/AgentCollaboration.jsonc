@@ -1,0 +1,58 @@
+{
+  "name": "AgentCollaboration",
+  "type": "object",
+  "properties": {
+    "collaboration_id": {
+      "type": "string",
+      "description": "Unique collaboration identifier"
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Agents in this collaboration"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "Why this collaboration was formed"
+    },
+    "formation_reason": {
+      "type": "string",
+      "enum": [
+        "complementary_skills",
+        "workload_distribution",
+        "knowledge_sharing",
+        "emergency_response"
+      ],
+      "description": "Reason for forming this team"
+    },
+    "performance_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Collaboration effectiveness score"
+    },
+    "tasks_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "dissolved",
+        "paused"
+      ],
+      "default": "active"
+    },
+    "formed_at": {
+      "type": "number",
+      "description": "Timestamp of formation"
+    }
+  },
+  "required": [
+    "agents",
+    "purpose",
+    "formation_reason"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "name": "NeuralCluster",
+  "type": "object",
+  "properties": {
+    "cluster_id": {
+      "type": "string",
+      "description": "Unique cluster identifier"
+    },
+    "member_nodes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Agent names in this cluster"
+    },
+    "hub_node": {
+      "type": "string",
+      "description": "Primary coordinator for this cluster"
+    },
+    "cluster_specialization": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dominant specializations in cluster"
+    },
+    "processing_capacity": {
+      "type": "number",
+      "description": "Aggregate processing power"
+    },
+    "current_load": {
+      "type": "number",
+      "default": 0,
+      "description": "Active tasks being processed"
+    },
+    "parent_cluster": {
+      "type": "string",
+      "description": "Parent cluster in hierarchy"
+    },
+    "child_clusters": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Sub-clusters in hierarchy"
+    },
+    "topology_type": {
+      "type": "string",
+      "enum": [
+        "ring",
+        "star",
+        "mesh",
+        "tree",
+        "hybrid"
+      ],
+      "default": "mesh",
+      "description": "Internal cluster topology"
+    },
+    "performance_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Cluster performance stats"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "cluster_id",
+    "member_nodes",
+    "hub_node"
+  ]
+}

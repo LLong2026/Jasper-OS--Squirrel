@@ -1,0 +1,50 @@
+{
+  "name": "TreasuryBalance",
+  "type": "object",
+  "properties": {
+    "account_id": {
+      "type": "string",
+      "description": "Associated treasury account"
+    },
+    "balance_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of balance snapshot"
+    },
+    "opening_balance": {
+      "type": "number",
+      "description": "Balance at start of day"
+    },
+    "closing_balance": {
+      "type": "number",
+      "description": "Balance at end of day"
+    },
+    "total_inflows": {
+      "type": "number",
+      "description": "Total deposits/credits"
+    },
+    "total_outflows": {
+      "type": "number",
+      "description": "Total withdrawals/debits"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "reconciled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether balance has been reconciled"
+    },
+    "blockchain_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether balance is verified on blockchain"
+    }
+  },
+  "required": [
+    "account_id",
+    "balance_date",
+    "closing_balance"
+  ]
+}

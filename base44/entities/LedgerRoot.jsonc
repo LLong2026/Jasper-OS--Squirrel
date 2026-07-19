@@ -1,0 +1,29 @@
+{
+  "name": "LedgerRoot",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "The ID of the project this ledger root belongs to."
+    },
+    "merkle_root": {
+      "type": "string",
+      "description": "The final Merkle root hash, representing a cryptographic commitment to a set of data anchors."
+    },
+    "data_anchor_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "An array of DataAnchor IDs included in this Merkle root calculation."
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "The blockchain transaction ID where this Merkle root is recorded (optional)."
+    }
+  },
+  "required": [
+    "project_id",
+    "merkle_root"
+  ]
+}

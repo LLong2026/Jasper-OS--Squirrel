@@ -1,0 +1,80 @@
+{
+  "name": "ConsensusProposal",
+  "type": "object",
+  "properties": {
+    "task_force_id": {
+      "type": "string",
+      "description": "Associated task force"
+    },
+    "proposed_by": {
+      "type": "string",
+      "description": "Agent proposing the decision"
+    },
+    "proposal": {
+      "type": "string",
+      "description": "The proposed action/decision"
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Why this is being proposed"
+    },
+    "votes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "agent": {
+            "type": "string"
+          },
+          "vote": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "reject",
+              "abstain"
+            ]
+          },
+          "reasoning": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "default": 1
+          }
+        }
+      },
+      "default": []
+    },
+    "consensus_threshold": {
+      "type": "number",
+      "default": 0.7,
+      "description": "Approval percentage needed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "executed"
+      ],
+      "default": "pending"
+    },
+    "final_decision": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Result of consensus"
+    },
+    "execution_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Outcome after execution"
+    }
+  },
+  "required": [
+    "task_force_id",
+    "proposed_by",
+    "proposal",
+    "rationale"
+  ]
+}

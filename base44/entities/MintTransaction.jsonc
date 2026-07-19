@@ -1,0 +1,67 @@
+{
+  "name": "MintTransaction",
+  "type": "object",
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "description": "Unique transaction identifier"
+    },
+    "coin_id": {
+      "type": "string",
+      "description": "Reference to StableCoin"
+    },
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "mint",
+        "burn",
+        "transfer",
+        "reserve_adjustment"
+      ],
+      "description": "Type of transaction"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount of coins involved"
+    },
+    "reserve_change": {
+      "type": "number",
+      "description": "Change in reserve backing"
+    },
+    "initiator": {
+      "type": "string",
+      "description": "Who initiated the transaction"
+    },
+    "authorized_by": {
+      "type": "string",
+      "description": "Authority who approved the transaction"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "executed",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "blockchain_anchor": {
+      "type": "string",
+      "description": "Link to blockchain record"
+    },
+    "compliance_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "execution_timestamp": {
+      "type": "number",
+      "description": "When transaction was executed"
+    }
+  },
+  "required": [
+    "coin_id",
+    "transaction_type",
+    "amount"
+  ]
+}

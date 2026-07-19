@@ -1,0 +1,57 @@
+{
+  "name": "ApprovalRequest",
+  "type": "object",
+  "properties": {
+    "action_type": {
+      "type": "string",
+      "description": "Type of action requiring approval"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "description": "Assessed risk level"
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Action details for review"
+    },
+    "estimated_cost": {
+      "type": "number",
+      "description": "Estimated cost in USD"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "executed"
+      ],
+      "default": "pending"
+    },
+    "auto_approve_threshold": {
+      "type": "number",
+      "description": "Cost threshold for auto-approval"
+    },
+    "executed_at": {
+      "type": "number",
+      "description": "Timestamp when action was executed"
+    },
+    "execution_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Result of the executed action"
+    }
+  },
+  "required": [
+    "action_type",
+    "risk_level",
+    "details"
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "name": "GlobalMemory",
+  "type": "object",
+  "properties": {
+    "memory_type": {
+      "type": "string",
+      "enum": [
+        "knowledge",
+        "experience",
+        "pattern",
+        "solution",
+        "failure"
+      ],
+      "description": "Type of memory stored"
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "The actual memory content"
+    },
+    "source_agent": {
+      "type": "string",
+      "description": "Agent that contributed this memory"
+    },
+    "confidence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "How confident the collective is in this memory"
+    },
+    "access_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this memory has been accessed"
+    },
+    "reinforcement_count": {
+      "type": "number",
+      "default": 1,
+      "description": "How many agents have validated this memory"
+    },
+    "related_memories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of related memories"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Searchable tags"
+    },
+    "decay_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "How quickly unused memory fades"
+    },
+    "last_accessed": {
+      "type": "number",
+      "description": "Timestamp of last access"
+    }
+  },
+  "required": [
+    "memory_type",
+    "content",
+    "source_agent"
+  ]
+}

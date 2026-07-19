@@ -1,0 +1,69 @@
+{
+  "name": "ReserveAsset",
+  "type": "object",
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "Unique reserve asset identifier"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "gold",
+        "silver",
+        "platinum",
+        "fiat_usd",
+        "treasury_bond",
+        "commodity"
+      ],
+      "description": "Type of reserve asset"
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Quantity of asset held"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measurement (oz, kg, USD, etc)"
+    },
+    "current_value_usd": {
+      "type": "number",
+      "description": "Current USD value"
+    },
+    "allocated_to_coin": {
+      "type": "string",
+      "description": "StableCoin this reserve backs"
+    },
+    "vault_location": {
+      "type": "string",
+      "description": "Physical storage location"
+    },
+    "custodian": {
+      "type": "string",
+      "description": "Entity holding the asset"
+    },
+    "certificate_url": {
+      "type": "string",
+      "description": "URL to authenticity certificate"
+    },
+    "last_audit_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "audit_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "pending",
+        "discrepancy"
+      ],
+      "default": "verified"
+    }
+  },
+  "required": [
+    "asset_type",
+    "quantity",
+    "unit",
+    "current_value_usd"
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "name": "IoTDevice",
+  "type": "object",
+  "properties": {
+    "device_id": {
+      "type": "string",
+      "description": "Unique device identifier"
+    },
+    "device_name": {
+      "type": "string",
+      "description": "Human-readable device name"
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "light",
+        "thermostat",
+        "lock",
+        "camera",
+        "sensor",
+        "switch",
+        "speaker",
+        "tv",
+        "unknown"
+      ],
+      "description": "Type of IoT device"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "Local IP address"
+    },
+    "mac_address": {
+      "type": "string",
+      "description": "MAC address"
+    },
+    "manufacturer": {
+      "type": "string",
+      "description": "Device manufacturer"
+    },
+    "model": {
+      "type": "string",
+      "description": "Device model"
+    },
+    "protocol": {
+      "type": "string",
+      "enum": [
+        "http",
+        "mqtt",
+        "coap",
+        "zigbee",
+        "zwave",
+        "ble",
+        "matter"
+      ],
+      "description": "Communication protocol"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "What the device can do"
+    },
+    "current_state": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Current device state"
+    },
+    "api_endpoint": {
+      "type": "string",
+      "description": "API endpoint for control"
+    },
+    "last_seen": {
+      "type": "number",
+      "description": "Last time device was online"
+    },
+    "is_online": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "device_id",
+    "ip_address",
+    "device_type"
+  ]
+}

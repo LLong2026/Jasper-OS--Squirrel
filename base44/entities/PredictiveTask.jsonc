@@ -1,0 +1,55 @@
+{
+  "name": "PredictiveTask",
+  "type": "object",
+  "properties": {
+    "predicted_need": {
+      "type": "string",
+      "description": "What the user will likely need"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Prediction confidence"
+    },
+    "based_on_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Historical patterns used for prediction"
+    },
+    "resources_prepositioned": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "What has been prepared"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "predicted",
+        "preparing",
+        "ready",
+        "executed",
+        "invalidated"
+      ],
+      "default": "predicted"
+    },
+    "validated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Was prediction correct"
+    },
+    "actual_need_match": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "How well prediction matched reality"
+    }
+  },
+  "required": [
+    "predicted_need",
+    "confidence",
+    "based_on_patterns"
+  ]
+}

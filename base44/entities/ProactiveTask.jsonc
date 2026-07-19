@@ -1,0 +1,74 @@
+{
+  "name": "ProactiveTask",
+  "type": "object",
+  "properties": {
+    "task_name": {
+      "type": "string",
+      "description": "Name of the proactive task"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "monitor",
+        "alert",
+        "brief",
+        "reminder",
+        "suggestion"
+      ],
+      "description": "Type of proactive task"
+    },
+    "monitoring_target": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "What to monitor (stocks, deadlines, news topics, etc)"
+    },
+    "trigger_conditions": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Conditions that trigger this task"
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "What action to take when triggered"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "realtime",
+        "hourly",
+        "daily",
+        "weekly"
+      ],
+      "default": "daily",
+      "description": "How often to check"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_triggered": {
+      "type": "number",
+      "description": "Last trigger timestamp"
+    },
+    "next_check": {
+      "type": "number",
+      "description": "Next scheduled check"
+    }
+  },
+  "required": [
+    "task_name",
+    "task_type",
+    "monitoring_target"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "ConnectedApp",
+  "type": "object",
+  "properties": {
+    "app_id": {
+      "type": "string",
+      "description": "Base44 app ID"
+    },
+    "app_name": {
+      "type": "string",
+      "description": "Human-readable app name"
+    },
+    "description": {
+      "type": "string",
+      "description": "What this app does"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "API key for this app"
+    },
+    "available_entities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of entity names in this app"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this connection is active"
+    }
+  },
+  "required": [
+    "app_id",
+    "app_name",
+    "api_key"
+  ]
+}

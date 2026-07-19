@@ -1,0 +1,66 @@
+{
+  "name": "EmergentPattern",
+  "type": "object",
+  "properties": {
+    "pattern_type": {
+      "type": "string",
+      "enum": [
+        "collaboration",
+        "resource_allocation",
+        "task_routing",
+        "communication"
+      ],
+      "description": "Type of emergent behavior"
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Agents involved in this pattern"
+    },
+    "trigger_conditions": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "What causes this pattern to emerge"
+    },
+    "observed_behavior": {
+      "type": "string",
+      "description": "What the agents are doing"
+    },
+    "frequency": {
+      "type": "number",
+      "default": 1,
+      "description": "How often this pattern occurs"
+    },
+    "effectiveness_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "How well this pattern works"
+    },
+    "should_formalize": {
+      "type": "boolean",
+      "default": false,
+      "description": "Should this become a formal protocol"
+    },
+    "formalized_as": {
+      "type": "string",
+      "description": "If formalized, what is it called"
+    },
+    "last_formalized_date": {
+      "type": "number",
+      "description": "Timestamp of last formalization"
+    },
+    "stability_period_days": {
+      "type": "number",
+      "default": 7,
+      "description": "Cooldown period before re-formalization"
+    }
+  },
+  "required": [
+    "pattern_type",
+    "participants",
+    "observed_behavior"
+  ]
+}

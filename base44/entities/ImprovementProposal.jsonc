@@ -1,0 +1,74 @@
+{
+  "name": "ImprovementProposal",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent proposing the improvement"
+    },
+    "proposal_type": {
+      "type": "string",
+      "enum": [
+        "model_routing",
+        "parameter_tuning",
+        "task_delegation",
+        "specialization_expansion",
+        "code_optimization"
+      ],
+      "description": "Type of improvement proposed"
+    },
+    "current_performance": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Current performance metrics"
+    },
+    "identified_weakness": {
+      "type": "string",
+      "description": "Specific weakness identified"
+    },
+    "proposed_change": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Detailed improvement proposal"
+    },
+    "expected_improvement": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Expected performance gains"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "validated",
+        "approved",
+        "implemented",
+        "rejected",
+        "rolled_back"
+      ],
+      "default": "proposed"
+    },
+    "constitutional_check": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Safety validation results"
+    },
+    "implementation_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Results after implementation"
+    },
+    "learned_from_failures": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Task IDs that triggered this proposal"
+    }
+  },
+  "required": [
+    "agent_name",
+    "proposal_type",
+    "identified_weakness"
+  ]
+}

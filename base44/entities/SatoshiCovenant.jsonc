@@ -1,0 +1,39 @@
+{
+  "name": "SatoshiCovenant",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "The ID of the project this covenant is associated with."
+    },
+    "satoshi_identifier": {
+      "type": "string",
+      "description": "A unique identifier for the specific Satoshi being programmed (e.g., outpoint)."
+    },
+    "ledger_root_id": {
+      "type": "string",
+      "description": "The ID of the LedgerRoot that contains the rules and data this covenant enforces."
+    },
+    "covenant_rules": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "A JSON object defining the smart contract logic and rules of the covenant."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Proposed",
+        "Inscribed",
+        "Active",
+        "Spent"
+      ],
+      "default": "Proposed",
+      "description": "The lifecycle status of the Covenant Satoshi."
+    }
+  },
+  "required": [
+    "project_id",
+    "satoshi_identifier",
+    "ledger_root_id"
+  ]
+}

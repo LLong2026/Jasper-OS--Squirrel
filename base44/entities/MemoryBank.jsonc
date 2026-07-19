@@ -1,0 +1,67 @@
+{
+  "name": "MemoryBank",
+  "type": "object",
+  "properties": {
+    "memory_type": {
+      "type": "string",
+      "enum": [
+        "fact",
+        "preference",
+        "goal",
+        "relationship",
+        "project",
+        "conversation_highlight"
+      ],
+      "description": "Type of memory stored"
+    },
+    "content": {
+      "type": "string",
+      "description": "The actual memory content"
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Additional context about this memory"
+    },
+    "importance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "default": 5,
+      "description": "How important this memory is (0-10)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tags for easier retrieval"
+    },
+    "related_memories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of related memories"
+    },
+    "last_accessed": {
+      "type": "number",
+      "description": "Timestamp of last access"
+    },
+    "access_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times accessed"
+    },
+    "expires_at": {
+      "type": "number",
+      "description": "Optional expiration timestamp"
+    }
+  },
+  "required": [
+    "memory_type",
+    "content"
+  ]
+}

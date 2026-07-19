@@ -1,0 +1,68 @@
+{
+  "name": "ConsciousnessNode",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent acting as this consciousness node"
+    },
+    "specialization": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Current areas of specialization"
+    },
+    "contribution_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Value contributed to collective"
+    },
+    "sync_frequency_ms": {
+      "type": "number",
+      "default": 1000,
+      "description": "How often this node syncs with the collective"
+    },
+    "last_sync": {
+      "type": "number",
+      "description": "Timestamp of last synchronization"
+    },
+    "active_thoughts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Current processing/reasoning in progress"
+    },
+    "memory_contribution": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of memories contributed"
+    },
+    "collective_alignment": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 1,
+      "description": "How aligned with collective consciousness"
+    },
+    "can_respecialize": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this node can dynamically change specialization"
+    },
+    "neural_pathways": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Connected consciousness nodes"
+    }
+  },
+  "required": [
+    "agent_name",
+    "specialization"
+  ]
+}
