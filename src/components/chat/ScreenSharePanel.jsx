@@ -18,6 +18,7 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
   const [error, setError] = useState('');
   const [liveMode, setLiveMode] = useState(false);
   const [lastLiveAt, setLastLiveAt] = useState(null);
+  const [collapsed, setCollapsed] = useState(false);
   const videoRef = useRef(null);
   const liveTimerRef = useRef(null);
   const streamRef = useRef(null); // keep a stable ref for the interval closure
@@ -86,8 +87,6 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
     setStream(null);
     if (videoRef.current) videoRef.current.srcObject = null;
   }, [stopLive]);
-
-  const [collapsed, setCollapsed] = useState(false);
 
   const startShare = useCallback(async () => {
     setError('');
