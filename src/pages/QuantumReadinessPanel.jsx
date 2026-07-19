@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Shield, ShieldCheck, KeyRound, RefreshCw, Plus, Zap, AlertCircle, Check, Loader2, Atom } from 'lucide-react';
+import { Shield, ShieldCheck, KeyRound, RefreshCw, Plus, Zap, AlertCircle, Check, Loader2, Atom, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -12,6 +12,13 @@ const SURFACES = [
 ];
 
 function ProfileBadge({ status }) {
+    if (status === 'PQ_ONLY') {
+        return (
+            <Badge className="bg-violet-500/15 text-violet-300 border-violet-500/40 hover:bg-violet-500/20">
+                <Atom className="h-3 w-3 mr-1" /> PQ_ONLY
+            </Badge>
+        );
+    }
     if (status === 'HYBRID_V1') {
         return (
             <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/20">
@@ -52,48 +59,55 @@ export default function QuantumReadinessPanel() {
 
     useEffect(() => { refresh(); }, [refresh]);
 
-    const issueKey = async (surface) => {
-        setBusy(surface);
+    const invoke = async (action, payload, busyKey, successMsg) => {
+        setBusy(busyKey);
         setNotice(null);
         try {
-            await base44.functions.invoke('quantumResilience', { action: 'generate_keypair', surface });
+            const res = await base44.functions.invoke('quantumResilience', { action, ...payload });
             await refresh();
+            if (successMsg) setNotice({ type: 'success', msg: successMsg(res.data) });
+            return res.data;
         } catch (e) {
-            setNotice({ type: 'error', msg: e?.response?.data?.error || e?.message || 'Key generation failed (admin only).' });
+            setNotice({ type: 'error', msg: e?.response?.data?.error || e?.message || `${action} failed.` });
+            return null;
         } finally { setBusy(null); }
     };
 
-    const rotateKey = async (keyId) => {
-        setBusy('rot_' + keyId);
-        setNotice(null);
-        try {
-            await base44.functions.invoke('quantumResilience', { action: 'rotate', key_id: keyId });
-            await refresh();
-        } catch (e) {
-            setNotice({ type: 'error', msg: e?.response?.data?.error || e?.message || 'Rotation failed.' });
-        } finally { setBusy(null); }
-    };
+    const issueKey = (surface) => invoke('generate_keypair', { surface }, surface);
+    const rotateKey = (keyId) => invoke('rotate', { key_id: keyId }, 'rot_' + keyId);
+
+    const revokeClassical = (surface) =>
+        invoke('revoke_classical', surface ? { surface } : {}, 'rev_' + (surface || 'all'),
+            (d) => `Revoked ${d.revoked} classical key(s) — surface now PQ_ONLY.`);
 
     const runHybridProbe = async () => {
-        setBusy('probe');
-        setNotice(null);
+        const payload = 'hybrid-probe-' + Date.now();
+        setBusy('hprobe'); setNotice(null);
         try {
-            const payload = 'quantum-resilience-probe-' + Date.now();
-            const signRes = await base44.functions.invoke('quantumResilience', { action: 'hybrid_sign', surface: 'threadzero', payload });
+            const sign = await base44.functions.invoke('quantumResilience', { action: 'hybrid_sign', surface: 'threadzero', payload });
             const v = await base44.functions.invoke('quantumResilience', {
-                action: 'verify',
-                pair_id: signRes.data.pair_id,
-                payload,
-                sig_classical: signRes.data.sig_classical,
-                sig_pq: signRes.data.sig_pq,
+                action: 'verify', pair_id: sign.data.pair_id, payload,
+                sig_classical: sign.data.sig_classical, sig_pq: sign.data.sig_pq,
             });
-            if (v.data.valid) {
-                setNotice({ type: 'success', msg: 'HYBRID_V1 dual-signature probe verified — both classical and PQ slots valid.' });
-            } else {
-                setNotice({ type: 'error', msg: 'Hybrid verification failed: ' + JSON.stringify(v.data) });
-            }
+            if (v.data.valid) setNotice({ type: 'success', msg: 'HYBRID_V1 dual-signature probe verified — both slots valid.' });
+            else setNotice({ type: 'error', msg: 'Hybrid verification failed: ' + JSON.stringify(v.data) });
         } catch (e) {
-            setNotice({ type: 'error', msg: e?.response?.data?.error || e?.message || 'Probe failed — issue a hybrid key for threadzero first.' });
+            setNotice({ type: 'error', msg: e?.response?.data?.error || e?.message || 'Hybrid probe failed — issue a hybrid key for threadzero first.' });
+        } finally { setBusy(null); }
+    };
+
+    const runPqProbe = async () => {
+        const payload = 'pq-only-probe-' + Date.now();
+        setBusy('pqprobe'); setNotice(null);
+        try {
+            const sign = await base44.functions.invoke('quantumResilience', { action: 'pq_sign', surface: 'threadzero', payload });
+            const v = await base44.functions.invoke('quantumResilience', {
+                action: 'pq_verify', pair_id: sign.data.pair_id, payload, sig_pq: sign.data.sig_pq,
+            });
+            if (v.data.valid) setNotice({ type: 'success', msg: 'PQ_ONLY probe verified — ML-DSA-65 slot valid, block_version 2.' });
+            else setNotice({ type: 'error', msg: 'PQ verification failed: ' + JSON.stringify(v.data) });
+        } catch (e) {
+            setNotice({ type: 'error', msg: e?.response?.data?.error || e?.message || 'PQ probe failed — reach PQ_ONLY on threadzero first.' });
         } finally { setBusy(null); }
     };
 
@@ -101,23 +115,26 @@ export default function QuantumReadinessPanel() {
         <div className="min-h-screen bg-slate-900 text-slate-100 p-6 md:p-10">
             <div className="max-w-6xl mx-auto space-y-6">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <div className="h-11 w-11 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-                                <Atom className="h-6 w-6 text-emerald-400" />
-                            </div>
-                            <div>
-                                <h1 className="text-2xl font-bold text-white">Quantum Readiness</h1>
-                                <p className="text-sm text-slate-400">JIP-QRM-01 · Phase 1 · HYBRID_V1 migration</p>
-                            </div>
+                    <div className="flex items-center gap-3">
+                        <div className="h-11 w-11 rounded-xl bg-violet-500/15 flex items-center justify-center">
+                            <Atom className="h-6 w-6 text-violet-400" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-white">Quantum Readiness</h1>
+                            <p className="text-sm text-slate-400">JIP-QRM-01/02 · runtime: <span className="text-violet-300 font-medium">{readiness?.runtime_crypto_mode || '…'}</span></p>
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        <Button onClick={runHybridProbe} disabled={!!busy} variant="outline" className="bg-slate-800 border-slate-700 hover:bg-slate-700">
-                            {busy === 'probe' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Zap className="h-4 w-4 mr-2" />}
-                            Run Hybrid Probe
+                    <div className="flex gap-2 flex-wrap">
+                        <Button onClick={runHybridProbe} disabled={!!busy} variant="outline" size="sm" className="bg-slate-800 border-slate-700 hover:bg-slate-700">
+                            {busy === 'hprobe' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />} Hybrid Probe
                         </Button>
-                        <Button onClick={refresh} disabled={loading} variant="outline" className="bg-slate-800 border-slate-700 hover:bg-slate-700">
+                        <Button onClick={runPqProbe} disabled={!!busy} variant="outline" size="sm" className="bg-slate-800 border-slate-700 hover:bg-slate-700">
+                            {busy === 'pqprobe' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Atom className="h-4 w-4 mr-2" />} PQ-Only Probe
+                        </Button>
+                        <Button onClick={() => revokeClassical(null)} disabled={!!busy} variant="outline" size="sm" className="bg-red-500/10 border-red-500/40 text-red-300 hover:bg-red-500/20">
+                            {busy === 'rev_all' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Ban className="h-4 w-4 mr-2" />} Revoke All Classical
+                        </Button>
+                        <Button onClick={refresh} disabled={loading} variant="outline" size="sm" className="bg-slate-800 border-slate-700 hover:bg-slate-700">
                             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
                         </Button>
                     </div>
@@ -133,9 +150,9 @@ export default function QuantumReadinessPanel() {
                 {/* Metrics */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <MetricCard icon={KeyRound} label="PQ Keys Issued" value={readiness?.pq_keys_issued ?? '—'} accent="text-violet-300" />
-                    <MetricCard icon={ShieldCheck} label="Agents Migrated" value={readiness ? `${readiness.agents_migrated}/${readiness.agents_total}` : '—'} accent="text-emerald-300" />
-                    <MetricCard icon={Atom} label="PQ Coverage" value={readiness ? `${readiness.pq_coverage}%` : '—'} accent="text-blue-300" />
-                    <MetricCard icon={Shield} label="Crypto Profile" value={readiness?.crypto_profile ?? '—'} accent="text-amber-300" />
+                    <MetricCard icon={Atom} label="Agents PQ-Only" value={readiness ? `${readiness.agents_pq_only}/${readiness.agents_total}` : '—'} accent="text-violet-300" />
+                    <MetricCard icon={ShieldCheck} label="Agents (Hybrid)" value={readiness ? `${readiness.agents_migrated}/${readiness.agents_total}` : '—'} accent="text-emerald-300" />
+                    <MetricCard icon={Shield} label="Legacy Remaining" value={readiness?.legacy_objects_remaining ?? '—'} accent="text-amber-300" />
                 </div>
 
                 {/* Surface cards */}
@@ -151,15 +168,23 @@ export default function QuantumReadinessPanel() {
                                     </div>
                                     <ProfileBadge status={status} />
                                 </div>
-                                <div className="mt-4">
-                                    {status === 'HYBRID_V1' ? (
+                                <div className="mt-4 flex gap-2 flex-wrap">
+                                    {status === 'PQ_ONLY' ? (
                                         <Button onClick={() => issueKey(s.id)} disabled={!!busy} variant="outline" size="sm" className="bg-slate-700/40 border-slate-600 hover:bg-slate-700">
-                                            <Plus className="h-4 w-4 mr-1" /> Issue New Hybrid Key
+                                            {busy === s.id ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />} Issue New PQ Key
                                         </Button>
+                                    ) : status === 'HYBRID_V1' ? (
+                                        <>
+                                            <Button onClick={() => revokeClassical(s.id)} disabled={busy === ('rev_' + s.id)} size="sm" className="bg-red-600 hover:bg-red-700">
+                                                {busy === ('rev_' + s.id) ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Ban className="h-4 w-4 mr-1" />} Revoke Classical → PQ_ONLY
+                                            </Button>
+                                            <Button onClick={() => issueKey(s.id)} disabled={!!busy} variant="outline" size="sm" className="bg-slate-700/40 border-slate-600 hover:bg-slate-700">
+                                                <Plus className="h-4 w-4 mr-1" /> New Hybrid Key
+                                            </Button>
+                                        </>
                                     ) : (
                                         <Button onClick={() => issueKey(s.id)} disabled={busy === s.id} size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-                                            {busy === s.id ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
-                                            Issue HYBRID_V1 Keypair
+                                            {busy === s.id ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />} Issue HYBRID_V1 Keypair
                                         </Button>
                                     )}
                                 </div>
@@ -225,7 +250,7 @@ export default function QuantumReadinessPanel() {
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed">
-                    PQ slot uses a deterministic HMAC-SHA256 construction representing ML-DSA-65 (see JIP-QRM-01 §4). Classical slot is real ECDSA P-256 via Web Crypto.
+                    PQ slot uses a deterministic HMAC-SHA256 construction representing ML-DSA-65 (see JIP-QRM-02 §4). Classical slot is real ECDSA P-256 via Web Crypto. Revoking the classical half flips a surface HYBRID_V1 → PQ_ONLY.
                 </p>
             </div>
         </div>

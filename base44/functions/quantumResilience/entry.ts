@@ -169,26 +169,77 @@ Deno.serve(async (req) => {
       const keys = await svc.list('-created_date', 500);
       const surfaces = ['threadzero', 'did', 'urib', 'agent_delegation'];
       const surfaceStatus = {};
+      let legacyRemaining = 0;
       for (const s of surfaces) {
-        const active = keys.filter((k) => k.surface === s && k.status === 'active');
-        const hasClassical = active.some((k) => k.key_type === 'ECDSA_P256_SIGNING');
-        const hasPq = active.some((k) => k.key_type === 'MLDSA65_SIGNING');
-        surfaceStatus[s] = hasClassical && hasPq ? 'HYBRID_V1' : 'pending';
+        const activePq = keys.filter((k) => k.surface === s && k.status === 'active' && k.key_type === 'MLDSA65_SIGNING');
+        const activeCls = keys.filter((k) => k.surface === s && k.status === 'active' && k.key_type === 'ECDSA_P256_SIGNING');
+        legacyRemaining += keys.filter((k) => k.surface === s && k.key_type === 'ECDSA_P256_SIGNING' && k.status !== 'revoked').length;
+        if (activePq.length > 0 && activeCls.length === 0) surfaceStatus[s] = 'PQ_ONLY';
+        else if (activePq.length > 0 && activeCls.length > 0) surfaceStatus[s] = 'HYBRID_V1';
+        else surfaceStatus[s] = 'pending';
       }
       const pqKeys = keys.filter((k) => k.key_type === 'MLDSA65_SIGNING');
+      const totalAgents = new Set(keys.filter((k) => k.agent_name).map((k) => k.agent_name));
       const migratedAgents = new Set(
         keys.filter((k) => k.agent_name && k.key_type === 'MLDSA65_SIGNING' && k.status === 'active').map((k) => k.agent_name)
       );
-      const totalAgents = new Set(keys.filter((k) => k.agent_name).map((k) => k.agent_name));
+      const pqOnlyAgents = new Set();
+      for (const a of totalAgents) {
+        const hasPq = keys.some((k) => k.agent_name === a && k.key_type === 'MLDSA65_SIGNING' && k.status === 'active');
+        const hasCls = keys.some((k) => k.agent_name === a && k.key_type === 'ECDSA_P256_SIGNING' && k.status === 'active');
+        if (hasPq && !hasCls) pqOnlyAgents.add(a);
+      }
       const coverage = totalAgents.size === 0 ? 0 : Math.round((migratedAgents.size / totalAgents.size) * 100);
+      const allPqOnly = surfaces.every((s) => surfaceStatus[s] === 'PQ_ONLY');
+      const anyHybrid = surfaces.some((s) => surfaceStatus[s] === 'HYBRID_V1');
+      const runtimeMode = allPqOnly ? 'PQ_ONLY' : anyHybrid ? 'HYBRID_V1' : 'pending';
       return Response.json({
         surfaces: surfaceStatus,
         pq_keys_issued: pqKeys.length,
         agents_migrated: migratedAgents.size,
+        agents_pq_only: pqOnlyAgents.size,
         agents_total: totalAgents.size,
+        legacy_objects_remaining: legacyRemaining,
         pq_coverage: coverage,
-        crypto_profile: 'HYBRID_V1',
+        runtime_crypto_mode: runtimeMode,
+        crypto_profile: allPqOnly ? 'PQ_ONLY' : 'HYBRID_V1',
       });
+    }
+
+    if (action === 'pq_sign') {
+      const data = enc.encode(body.payload || '');
+      const pqKey = body.pair_id
+        ? (await svc.filter({ pair_id: body.pair_id, key_type: 'MLDSA65_SIGNING', status: 'active' }))[0]
+        : (await svc.filter({ surface: body.surface, key_type: 'MLDSA65_SIGNING', status: 'active' }))[0];
+      if (!pqKey) return Response.json({ error: 'No active PQ key for surface' }, { status: 400 });
+      const sigPq = await pqSign(pqKey.private_material, data);
+      return Response.json({ sig_pq: sigPq, crypto_profile: 'PQ_ONLY', block_version: 2, pair_id: pqKey.pair_id });
+    }
+
+    if (action === 'pq_verify') {
+      const data = enc.encode(body.payload || '');
+      const pqKey = (await svc.filter({ pair_id: body.pair_id, key_type: 'MLDSA65_SIGNING' }))[0];
+      if (!pqKey) return Response.json({ error: 'PQ key not found' }, { status: 404 });
+      const pv = await pqVerify(pqKey.private_material, body.sig_pq, data);
+      return Response.json({ valid: pv, pq_valid: pv, crypto_profile: 'PQ_ONLY', block_version: 2 });
+    }
+
+    if (action === 'revoke_classical') {
+      const denied = requireAdmin();
+      if (denied) return denied;
+      const now = Date.now();
+      const targets = body.surface
+        ? await svc.filter({ surface: body.surface, key_type: 'ECDSA_P256_SIGNING', status: 'active' })
+        : await svc.filter({ key_type: 'ECDSA_P256_SIGNING', status: 'active' });
+      for (const t of targets) {
+        await svc.update(t.id, {
+          status: 'revoked',
+          revocation_reason: 'Quantum Migration',
+          revocation_date: now,
+          legacy_verification_supported: true,
+        });
+      }
+      return Response.json({ revoked: targets.length, runtime_crypto_mode: 'PQ_ONLY' });
     }
 
     if (action === 'list_keys') {

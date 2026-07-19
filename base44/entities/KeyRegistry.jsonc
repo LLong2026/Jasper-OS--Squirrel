@@ -60,6 +60,19 @@
       "default": "active",
       "description": "Key lifecycle status"
     },
+    "revocation_reason": {
+      "type": "string",
+      "description": "Reason the key was revoked (e.g. Quantum Migration)"
+    },
+    "revocation_date": {
+      "type": "number",
+      "description": "Timestamp the key was revoked"
+    },
+    "legacy_verification_supported": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether legacy objects signed by this classical key may still be verified"
+    },
     "rotated_from": {
       "type": "string",
       "description": "pair_id this key rotated from"
