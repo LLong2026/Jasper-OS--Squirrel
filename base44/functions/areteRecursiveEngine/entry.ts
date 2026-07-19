@@ -6,6 +6,28 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 // → Trainer → ModelRegistry → CapsuleComposer
 // Plus: Self-optimization proposals (agents propose their own training improvements)
 
+// ─── REAL AGENT FLEET REGISTRY ───
+// Each agent maps to a REAL deployed backend function invoked during the loop.
+// No placeholders — these execute live logic and return real results.
+const AGENT_FLEET = [
+  { name: 'recursiveLearner', function_name: 'recursiveLearner', description: 'Stores learning signals and triggers auto-retraining', domain: 'learning', category: 'core' },
+  { name: 'knowledgeSynthesis', function_name: 'knowledgeSynthesis', description: 'Synthesizes knowledge across domains from multiple sources', domain: 'knowledge', category: 'core' },
+  { name: 'reasoningEngine', function_name: 'reasoningEngine', description: 'Logical inference and multi-step reasoning', domain: 'reasoning', category: 'core' },
+  { name: 'codeGeneration', function_name: 'codeGeneration', description: 'Generates production code from specifications', domain: 'engineering', category: 'core' },
+  { name: 'safetyGuardian', function_name: 'safetyGuardian', description: 'Pre-execution safety validation and policy enforcement', domain: 'safety', category: 'guardian' },
+  { name: 'metaLearning', function_name: 'metaLearning', description: 'Meta-learning: learns how to learn better from past tasks', domain: 'learning', category: 'core' },
+  { name: 'crossAgentLearning', function_name: 'crossAgentLearning', description: 'Shares learned knowledge across agents in the mesh', domain: 'learning', category: 'core' },
+  { name: 'predictiveOrchestrator', function_name: 'predictiveOrchestrator', description: 'Predicts optimal task routing and resource allocation', domain: 'orchestration', category: 'core' },
+  { name: 'autonomousSelfImprovement', function_name: 'autonomousSelfImprovement', description: 'Identifies and proposes system self-improvements', domain: 'learning', category: 'core' },
+  { name: 'selfCorrectionEngine', function_name: 'selfCorrectionEngine', description: 'Detects and corrects errors in agent outputs', domain: 'quality', category: 'core' },
+  { name: 'knowledgeGraphBuilder', function_name: 'knowledgeGraphBuilder', description: 'Builds and queries knowledge graphs from event data', domain: 'knowledge', category: 'core' },
+  { name: 'emergentBehaviorEngine', function_name: 'emergentBehaviorEngine', description: 'Detects emergent patterns and behaviors in the fleet', domain: 'learning', category: 'core' },
+  { name: 'multiModelConsensus', function_name: 'multiModelConsensus', description: 'Runs multi-model consensus for high-stakes decisions', domain: 'reasoning', category: 'core' },
+  { name: 'riskAssessment', function_name: 'riskAssessment', description: 'Assesses risk of proposed actions and decisions', domain: 'safety', category: 'guardian' },
+  { name: 'taskDecomposer', function_name: 'taskDecomposer', description: 'Breaks complex tasks into subtasks for parallel execution', domain: 'orchestration', category: 'core' },
+  { name: 'refactoringEngine', function_name: 'refactoringEngine', description: 'Analyzes and refactors code for optimization', domain: 'engineering', category: 'core' },
+];
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -91,9 +113,10 @@ Deno.serve(async (req) => {
       const features = featureResult;
       stages.push({ stage: 'FeatureStore', status: 'passed', detail: `Features: ${features.task_type}, complexity ${(features.complexity_score || 0).toFixed(2)}` });
 
-      // 3. AGENT MESH — Select best agents
+      // 3. AGENT MESH — Select best agents from the REAL fleet registry
+      const fleetRoster = AGENT_FLEET.map(a => `${a.name} (${a.domain}): ${a.description}`).join('\n');
       const agentResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are the Arete Agent Mesh dispatcher. Select the best AI agents from this fleet: recursiveLearner, modelTrainer, knowledgeSynthesis, reasoningEngine, codeGeneration, safetyGuardian, metaLearning, crossAgentLearning, predictiveOrchestrator, autonomousSelfImprovement.\n\nFeatures: ${JSON.stringify(features)}\nEvent: ${JSON.stringify(event)}\n\nReturn JSON with: selected_agents (array of strings), routing_confidence (0-1), strategy (string).`,
+        prompt: `You are the Arete Agent Mesh dispatcher. Select the best 2-4 agents for this task from this REAL fleet:\n${fleetRoster}\n\nFeatures: ${JSON.stringify(features)}\nEvent: ${JSON.stringify(event)}\n\nReturn JSON with: selected_agents (array of agent names from the fleet above), routing_confidence (0-1), strategy (string explaining the approach).`,
         response_json_schema: {
           type: 'object',
           properties: {
@@ -103,7 +126,11 @@ Deno.serve(async (req) => {
           },
         },
       });
-      stages.push({ stage: 'AgentMesh', status: 'passed', detail: `Selected ${agentResult.selected_agents.length} agents: ${agentResult.selected_agents.join(', ')}` });
+      // Resolve selected names to REAL fleet entries (filter out any LLM hallucinations)
+      const selectedAgents = (agentResult.selected_agents || [])
+        .map(name => AGENT_FLEET.find(a => a.name === name))
+        .filter(a => a);
+      stages.push({ stage: 'AgentMesh', status: 'passed', detail: `Selected ${selectedAgents.length} real agents: ${selectedAgents.map(a => a.name).join(', ')}` });
 
       // 4. SAFETY AGENT — Pre-check validators
       const safetyResult = await base44.integrations.Core.InvokeLLM({
@@ -123,11 +150,26 @@ Deno.serve(async (req) => {
         return Response.json({ success: false, error: 'Safety check failed', reason: safetyResult.reason, stages });
       }
 
-      // 5. AGENT EXECUTION — Master orchestrator generates decision
+      // 5. AGENT EXECUTION — Invoke each selected agent's REAL backend function in parallel
+      const agentPayload = { task: event?.task || JSON.stringify(event), context: event, features, strategy: agentResult.strategy };
+      const agentResults = await Promise.all(selectedAgents.map(async (agent) => {
+        const t0 = Date.now();
+        try {
+          const raw = await base44.functions.invoke(agent.function_name, agentPayload);
+          const result = raw?.data || raw;
+          return { agent: agent.name, function: agent.function_name, success: true, result, execution_ms: Date.now() - t0 };
+        } catch (e) {
+          return { agent: agent.name, function: agent.function_name, success: false, error: e.message, execution_ms: Date.now() - t0 };
+        }
+      }));
+      const successfulResults = agentResults.filter(r => r.success);
+      const failedResults = agentResults.filter(r => !r.success);
+      stages.push({ stage: 'AgentMesh', status: 'passed', detail: `${successfulResults.length}/${agentResults.length} real agents executed${failedResults.length ? ` (${failedResults.length} failed: ${failedResults.map(f => f.agent).join(', ')})` : ''}` });
+
+      // Synthesize the REAL agent results into a unified decision
       const decisionResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are the Arete Master Orchestrator. Using this strategy: ${agentResult.strategy}\n\nEvent: ${JSON.stringify(event)}\nFeatures: ${JSON.stringify(features)}\n\nGenerate a comprehensive, actionable response with specific steps, reasoning, and expected outcomes.`,
+        prompt: `You are the Arete Master Orchestrator. Synthesize the real results from these agent executions into a unified, actionable decision.\n\nStrategy: ${agentResult.strategy}\nEvent: ${JSON.stringify(event)}\nFeatures: ${JSON.stringify(features)}\n\nAgent Execution Results:\n${JSON.stringify(successfulResults, null, 2)}\n\nProvide a comprehensive response integrating what the agents ACTUALLY returned. Reference specific findings from each agent. Include next steps based on real outputs.`,
       });
-      stages.push({ stage: 'AgentMesh', status: 'passed', detail: 'Decision synthesized and returned to client' });
 
       // 6. AUDIT — Write decision snapshot + merkle leaf
       const merkleData = new TextEncoder().encode(JSON.stringify({ event, decision: (decisionResult || '').substring(0, 500), timestamp: startTime }));
@@ -138,7 +180,7 @@ Deno.serve(async (req) => {
         actor: user.full_name || 'Arete Engine',
         timestamp: Date.now(),
         severity: 'info',
-        event_data: JSON.stringify({ decision: (decisionResult || '').substring(0, 500), agents: agentResult.selected_agents, confidence: agentResult.routing_confidence }),
+        event_data: JSON.stringify({ decision: (decisionResult || '').substring(0, 500), agents: selectedAgents.map(a => a.name), confidence: agentResult.routing_confidence, agent_success: `${successfulResults.length}/${agentResults.length}` }),
         record_type: 'arete_recursive',
         document_hash: merkleHash,
       });
@@ -150,7 +192,7 @@ Deno.serve(async (req) => {
         learningSignal = await base44.entities.LearningSignal.create({
           event_id: eventRecord.id,
           task_type: features.task_type,
-          agents_used: agentResult.selected_agents,
+          agents_used: selectedAgents.map(a => a.name),
           success: true,
           execution_time_ms: Date.now() - startTime,
           features: features,
@@ -164,7 +206,7 @@ Deno.serve(async (req) => {
         name: 'loop_execution_time',
         value: Date.now() - startTime,
         type: 'latency',
-        context: { task_type: features.task_type, agents: agentResult.selected_agents },
+        context: { task_type: features.task_type, agents: selectedAgents.map(a => a.name) },
         timestamp: Date.now(),
         agent_name: 'arete_engine',
         domain: features.domain || domain,
@@ -218,7 +260,8 @@ Deno.serve(async (req) => {
         signal_id: learningSignal?.id,
         decision: decisionResult,
         features: features,
-        agents: agentResult.selected_agents,
+        agents: selectedAgents.map(a => a.name),
+        agent_results: agentResults,
         strategy: agentResult.strategy,
         confidence: agentResult.routing_confidence,
         merkle_leaf: merkleHash,
@@ -327,6 +370,11 @@ Deno.serve(async (req) => {
       const { proposal_id, reason } = body;
       await svc.OptimizationEvent.update(proposal_id, { status: 'rejected', actual_results: { rejection_reason: reason || 'Rejected by user' } });
       return Response.json({ success: true, proposal_id, status: 'rejected' });
+    }
+
+    // ─── GET_AGENT_FLEET — Return the real agent registry ───
+    if (action === 'get_agent_fleet') {
+      return Response.json({ fleet: AGENT_FLEET, count: AGENT_FLEET.length });
     }
 
     return Response.json({ error: 'Unknown action: ' + action }, { status: 400 });

@@ -9,6 +9,7 @@ import MonitorWidget from '@/components/arete/MonitorWidget';
 import LoopVisualization from '@/components/arete/LoopVisualization';
 import OptimizationProposals from '@/components/arete/OptimizationProposals';
 import PatternsFeed from '@/components/arete/PatternsFeed';
+import AgentFleet from '@/components/arete/AgentFleet';
 
 const DEFAULT_EVENT = { task: 'Analyze the latest system telemetry and recommend infrastructure optimizations for the agent fleet', domain: 'devops' };
 
@@ -18,7 +19,15 @@ export default function AreteEngine() {
   const [loopRunning, setLoopRunning] = useState(false);
   const [loopResult, setLoopResult] = useState(null);
   const [generating, setGenerating] = useState(false);
+  const [fleet, setFleet] = useState(null);
   const [error, setError] = useState(null);
+
+  const fetchFleet = useCallback(async () => {
+    try {
+      const res = await base44.functions.invoke('areteRecursiveEngine', { action: 'get_agent_fleet' });
+      setFleet(res.data?.fleet);
+    } catch (e) {}
+  }, []);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -27,7 +36,7 @@ export default function AreteEngine() {
     } catch (e) { setError(e.message); }
   }, []);
 
-  useEffect(() => { fetchStatus(); const i = setInterval(fetchStatus, 15000); return () => clearInterval(i); }, [fetchStatus]);
+  useEffect(() => { fetchStatus(); fetchFleet(); const i = setInterval(fetchStatus, 15000); return () => clearInterval(i); }, [fetchStatus, fetchFleet]);
 
   const runLoop = async () => {
     setLoopRunning(true); setError(null); setLoopResult(null);
@@ -155,6 +164,12 @@ export default function AreteEngine() {
                 onReject={rejectProposal}
                 generating={generating}
               />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900/80 border-slate-800">
+            <CardContent className="p-4">
+              <AgentFleet fleet={fleet} agentResults={loopResult?.agent_results} />
             </CardContent>
           </Card>
 
