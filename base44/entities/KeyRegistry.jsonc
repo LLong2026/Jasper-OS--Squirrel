@@ -15,9 +15,10 @@
       "enum": [
         "ECDSA_P256_SIGNING",
         "MLDSA65_SIGNING",
+        "MLDSA65_REAL_SIGNING",
         "MLKEM768_KEM"
       ],
-      "description": "Cryptographic key type (classical or PQ)"
+      "description": "Cryptographic key type (classical, PQ simulation, or real FIPS-204 ML-DSA-65)"
     },
     "key_profile": {
       "type": "string",
@@ -27,6 +28,15 @@
         "hybrid"
       ],
       "description": "Crypto profile this key belongs to"
+    },
+    "crypto_backend": {
+      "type": "string",
+      "enum": [
+        "software",
+        "hsm"
+      ],
+      "default": "software",
+      "description": "Where private key material is held: in-process (software) or a hardware security module (hsm). hsm requires HSM_PROVIDER configured."
     },
     "surface": {
       "type": "string",
@@ -44,11 +54,11 @@
     },
     "public_key": {
       "type": "string",
-      "description": "Base64 public key material (SPKI for ECDSA; derived id for PQ simulation)"
+      "description": "Base64 public key material (SPKI for ECDSA; derived id for PQ simulation; raw ML-DSA-65 public key for real keys)"
     },
     "private_material": {
       "type": "string",
-      "description": "Base64 private key material (simulation only \u2014 HSM-backed in production)"
+      "description": "Base64 private key material. For MLDSA65_REAL_SIGNING + software backend this holds the raw secret key in-process; HSM-backed keys hold an opaque key handle reference instead."
     },
     "status": {
       "type": "string",

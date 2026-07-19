@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { ml_dsa65 } from 'npm:@noble/post-quantum@0.6.1/ml-dsa.js';
 
 // Jasper OS Crypto Abstraction Layer — JIP-QRM-01 Phase 1 (HYBRID_V1)
 // Classical slot: ECDSA P-256 (real Web Crypto).
@@ -66,6 +67,41 @@ async function pqSign(secretB64, data) {
 async function pqVerify(secretB64, sigB64, data) {
   const key = await crypto.subtle.importKey('raw', fromB64(secretB64), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
   return await crypto.subtle.verify('HMAC', key, fromB64(sigB64), data);
+}
+
+// --- Real ML-DSA-65 (FIPS 204) via @noble/post-quantum ---
+// Genuine lattice-based post-quantum signatures, distinct from the HMAC-SHA256
+// simulation above. These keypairs/signatures would satisfy a real ML-DSA-65
+// verifier and are the money-grade path for PQ-native custody.
+
+function realMlDsaKeypair() {
+  const { publicKey, secretKey } = ml_dsa65.keygen();
+  return { pubB64: toB64(publicKey), secB64: toB64(secretKey) };
+}
+
+function realMlDsaSign(secB64, data) {
+  const sig = ml_dsa65.sign(new Uint8Array(data), fromB64(secB64));
+  return toB64(sig);
+}
+
+function realMlDsaVerify(pubB64, sigB64, data) {
+  return ml_dsa65.verify(fromB64(sigB64), new Uint8Array(data), fromB64(pubB64));
+}
+
+// --- HSM provider abstraction ---
+// Integration point for hardware-backed key custody. Today the layer runs real
+// ML-DSA-65 (FIPS 204) in-process (software mode). To route key operations
+// through a managed HSM (AWS KMS / CloudHSM, Azure Key Vault, etc.) for
+// money-grade custody, bind key material to opaque HSM handles and route
+// sign/verify through a provider SDK — the crypto_backend field on each key
+// already tracks 'software' vs 'hsm' custody so the switch is data-driven.
+// Provider config is supplied via platform secrets when a real HSM is provisioned.
+function getHsmConfig() {
+  return {
+    configured: false,
+    active_backend: 'software',
+    provider: null,
+  };
 }
 
 Deno.serve(async (req) => {
@@ -306,6 +342,86 @@ Deno.serve(async (req) => {
     if (action === 'list_keys') {
       const keys = await svc.list('-created_date', 200);
       return Response.json({ keys });
+    }
+
+    // --- Real ML-DSA-65 (FIPS 204) actions ---
+    if (action === 'pq_real_keypair') {
+      const denied = requireAdmin();
+      if (denied) return denied;
+      const surface = body.surface || 'urib';
+      const agentName = body.agent_name || null;
+      const pairId = keyId('pair');
+      const { pubB64, secB64 } = realMlDsaKeypair();
+      const now = Date.now();
+      const rec = await svc.create({
+        key_id: keyId('kr'), pair_id: pairId,
+        key_type: 'MLDSA65_REAL_SIGNING', key_profile: 'pq',
+        surface, agent_name: agentName,
+        public_key: pubB64, private_material: secB64,
+        crypto_backend: 'software',
+        status: 'active', created_at: now,
+      });
+      return Response.json({
+        pair_id: pairId, key_id: rec.key_id,
+        key_type: 'MLDSA65_REAL_SIGNING',
+        crypto_backend: 'software',
+        crypto_profile: 'PQ_NATIVE',
+        algorithm: 'ML-DSA-65 (FIPS 204)',
+        note: 'Real lattice-based PQ keypair via @noble/post-quantum. Software-backed; set HSM_PROVIDER for hardware custody.',
+      });
+    }
+
+    if (action === 'pq_real_sign') {
+      const data = enc.encode(body.payload || '');
+      const pqKey = body.pair_id
+        ? (await svc.filter({ pair_id: body.pair_id, key_type: 'MLDSA65_REAL_SIGNING', status: 'active' }))[0]
+        : (await svc.filter({ surface: body.surface, key_type: 'MLDSA65_REAL_SIGNING', status: 'active' }))[0];
+      if (!pqKey) return Response.json({ error: 'No active real ML-DSA-65 key for surface' }, { status: 400 });
+      const sigPq = realMlDsaSign(pqKey.private_material, data);
+      return Response.json({
+        sig_pq: sigPq,
+        algorithm: 'ML-DSA-65 (FIPS 204)',
+        crypto_backend: pqKey.crypto_backend || 'software',
+        crypto_profile: 'PQ_NATIVE',
+        block_version: 3,
+        pair_id: pqKey.pair_id,
+      });
+    }
+
+    if (action === 'pq_real_verify') {
+      const data = enc.encode(body.payload || '');
+      const pqKey = body.pair_id
+        ? (await svc.filter({ pair_id: body.pair_id, key_type: 'MLDSA65_REAL_SIGNING' }))[0]
+        : (await svc.filter({ surface: body.surface, key_type: 'MLDSA65_REAL_SIGNING' }))[0];
+      if (!pqKey) return Response.json({ error: 'Real ML-DSA-65 key not found' }, { status: 404 });
+      const valid = realMlDsaVerify(pqKey.public_key, body.sig_pq, data);
+      return Response.json({
+        valid,
+        pq_valid: valid,
+        algorithm: 'ML-DSA-65 (FIPS 204)',
+        crypto_profile: 'PQ_NATIVE',
+        block_version: 3,
+      });
+    }
+
+    if (action === 'crypto_backend_status') {
+      const hsm = getHsmConfig();
+      const realKeys = await svc.filter({ key_type: 'MLDSA65_REAL_SIGNING', status: 'active' });
+      return Response.json({
+        active_backend: hsm.active_backend,
+        hsm_configured: hsm.configured,
+        hsm_provider: hsm.provider,
+        hsm_region: hsm.region || null,
+        algorithm: 'ML-DSA-65 (FIPS 204)',
+        library: '@noble/post-quantum',
+        real_pq_keys_active: realKeys.length,
+        software_backed_real_keys: realKeys.filter((k) => (k.crypto_backend || 'software') === 'software').length,
+        hsm_backed_keys: realKeys.filter((k) => k.crypto_backend === 'hsm').length,
+        money_grade_ready: hsm.configured,
+        note: hsm.configured
+          ? 'Hardware-backed key custody active.'
+          : 'Software-backed ML-DSA-65 active. Set HSM_PROVIDER + credentials for hardware custody before touching real money.',
+      });
     }
 
     return Response.json({ error: 'Unknown action' }, { status: 400 });
