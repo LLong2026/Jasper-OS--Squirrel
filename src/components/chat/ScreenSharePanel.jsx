@@ -25,6 +25,15 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
   // keep streamRef in sync
   useEffect(() => { streamRef.current = stream; }, [stream]);
 
+  // When the panel re-expands, re-attach the live stream to the (now-mounted)
+  // modal video element so the preview keeps playing.
+  useEffect(() => {
+    if (!collapsed && streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [collapsed]);
+
   const captureFrame = useCallback(async (label = 'live') => {
     const video = videoRef.current;
     if (!video || !video.videoWidth) return null;
@@ -56,6 +65,7 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
   const startLive = useCallback(async () => {
     if (!streamRef.current) return;
     setLiveMode(true);
+    setCollapsed(true); // hide the modal so chat stays fully interactive
     // capture immediately, then on interval
     const tick = async () => {
       const url = await captureFrame('live');
@@ -77,6 +87,8 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
     if (videoRef.current) videoRef.current.srcObject = null;
   }, [stopLive]);
 
+  const [collapsed, setCollapsed] = useState(false);
+
   const startShare = useCallback(async () => {
     setError('');
     try {
@@ -90,11 +102,15 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
       });
       setStream(mediaStream);
       streamRef.current = mediaStream;
+      // Wait for the video element to mount, then attach the stream and
+      // auto-start Live Vision so Jasper can see the selected screen.
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
           videoRef.current.play().catch(() => {});
         }
+        // Kick off live vision automatically once the frame is ready.
+        setTimeout(() => { startLive(); }, 400);
       }, 50);
 
       mediaStream.getVideoTracks()[0]?.addEventListener('ended', () => {
@@ -107,7 +123,7 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
         setError(err.message || 'Could not start screen share.');
       }
     }
-  }, [stopShare]);
+  }, [stopShare, startLive]);
 
   const handleClose = useCallback(() => {
     stopShare();
@@ -138,6 +154,51 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
 
   if (!open) return null;
 
+  // The shared screen is being captured — keep the video element mounted (hidden)
+  // so frames can be grabbed, but get out of the user's way: a small floating pill
+  // is all that remains on screen, leaving the chat fully interactive.
+  if (collapsed && stream) {
+    return (
+      <>
+        {/* hidden but rendered video — required to capture frames */}
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          style={{ position: 'fixed', top: 0, left: 0, width: 2, height: 2, opacity: 0.01, pointerEvents: 'none', zIndex: -1 }}
+        />
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full border border-red-500/40 bg-slate-900/95 px-3 py-2 shadow-2xl backdrop-blur">
+          <span className="flex items-center gap-1.5 rounded-full bg-red-600/20 px-2 py-0.5 text-xs text-red-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" /> LIVE VISION
+          </span>
+          {lastLiveAt && (
+            <span className="text-[10px] text-slate-400">
+              {new Date(lastLiveAt).toLocaleTimeString()}
+            </span>
+          )}
+          <Button
+            onClick={() => setCollapsed(false)}
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-slate-400 hover:text-slate-200"
+            title="Open controls"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={stopShare}
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-red-400 hover:text-red-300"
+            title="Stop sharing"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-3xl rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
@@ -151,9 +212,22 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
               </span>
             )}
           </div>
-          <Button variant="ghost" size="icon" onClick={handleClose} className="text-slate-400 hover:text-slate-200">
-            <X className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            {stream && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCollapsed(true)}
+                className="text-slate-400 hover:text-slate-200"
+                title="Minimize — keep Jasper watching in the background"
+              >
+                <EyeOff className="h-5 w-5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" onClick={handleClose} className="text-slate-400 hover:text-slate-200">
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="p-5">
