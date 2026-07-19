@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio } from 'lucide-react';
+import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio, Workflow } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +28,7 @@ export default function Layout({ children, currentPageName }) {
         { name: 'CapabilitiesDashboard', href: createPageUrl('CapabilitiesDashboard'), icon: Gauge },
         { name: 'AuditHolonomy', href: createPageUrl('AuditHolonomyDashboard'), icon: Orbit },
         { name: 'BridgeVisualizer', href: createPageUrl('BridgeVisualizer'), icon: Radio },
+        { name: 'SwarmConsole', href: createPageUrl('SwarmConsole'), icon: Workflow },
     ];
 
     return (

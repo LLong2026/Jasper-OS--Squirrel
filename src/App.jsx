@@ -11,6 +11,7 @@ import OmegaManifold from './pages/OmegaManifold';
 import CapabilitiesDashboard from './pages/CapabilitiesDashboard';
 import AuditHolonomyDashboard from './pages/AuditHolonomyDashboard';
 import BridgeVisualizer from './pages/BridgeVisualizer';
+import SwarmConsole from './pages/SwarmConsole';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -82,6 +83,11 @@ const AuthenticatedApp = () => {
       <Route path="/BridgeVisualizer" element={
         <LayoutWrapper currentPageName="BridgeVisualizer">
           <BridgeVisualizer />
+        </LayoutWrapper>
+      } />
+      <Route path="/SwarmConsole" element={
+        <LayoutWrapper currentPageName="SwarmConsole">
+          <SwarmConsole />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
