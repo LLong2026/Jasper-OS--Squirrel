@@ -12,6 +12,13 @@ const SURFACES = [
 ];
 
 function ProfileBadge({ status }) {
+    if (status === 'PQ_NATIVE') {
+        return (
+            <Badge className="bg-indigo-500/15 text-indigo-300 border-indigo-500/40 hover:bg-indigo-500/20">
+                <Atom className="h-3 w-3 mr-1" /> PQ_NATIVE
+            </Badge>
+        );
+    }
     if (status === 'PQ_ONLY') {
         return (
             <Badge className="bg-violet-500/15 text-violet-300 border-violet-500/40 hover:bg-violet-500/20">
@@ -80,6 +87,25 @@ export default function QuantumReadinessPanel() {
         invoke('revoke_classical', surface ? { surface } : {}, 'rev_' + (surface || 'all'),
             (d) => `Revoked ${d.revoked} classical key(s) — surface now PQ_ONLY.`);
 
+    const decommission = (surface) =>
+        invoke('decommission', surface ? { surface } : {}, 'dec_' + (surface || 'all'),
+            (d) => `Decommissioned ${d.decommissioned} classical key(s) — legacy sealed, surface now PQ_NATIVE (v3).`);
+
+    const runPqNativeProbe = async () => {
+        const payload = 'pq-native-block-' + Date.now();
+        setBusy('pqnative'); setNotice(null);
+        try {
+            const sign = await base44.functions.invoke('quantumResilience', { action: 'pq_native_sign', surface: 'threadzero', payload });
+            const v = await base44.functions.invoke('quantumResilience', {
+                action: 'pq_native_verify', pair_id: sign.data.pair_id, payload, sig_pq: sign.data.sig_pq,
+            });
+            if (v.data.valid) setNotice({ type: 'success', msg: 'PQ_NATIVE probe verified — ML-DSA-65 exclusive, block_version 3.' });
+            else setNotice({ type: 'error', msg: 'PQ_NATIVE verification failed: ' + JSON.stringify(v.data) });
+        } catch (e) {
+            setNotice({ type: 'error', msg: e?.response?.data?.error || e?.message || 'PQ_NATIVE probe failed — decommission threadzero first.' });
+        } finally { setBusy(null); }
+    };
+
     const runHybridProbe = async () => {
         const payload = 'hybrid-probe-' + Date.now();
         setBusy('hprobe'); setNotice(null);
@@ -131,8 +157,14 @@ export default function QuantumReadinessPanel() {
                         <Button onClick={runPqProbe} disabled={!!busy} variant="outline" size="sm" className="bg-slate-800 border-slate-700 hover:bg-slate-700">
                             {busy === 'pqprobe' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Atom className="h-4 w-4 mr-2" />} PQ-Only Probe
                         </Button>
+                        <Button onClick={runPqNativeProbe} disabled={!!busy} variant="outline" size="sm" className="bg-indigo-500/10 border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/20">
+                            {busy === 'pqnative' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Atom className="h-4 w-4 mr-2" />} PQ-Native Probe
+                        </Button>
                         <Button onClick={() => revokeClassical(null)} disabled={!!busy} variant="outline" size="sm" className="bg-red-500/10 border-red-500/40 text-red-300 hover:bg-red-500/20">
                             {busy === 'rev_all' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Ban className="h-4 w-4 mr-2" />} Revoke All Classical
+                        </Button>
+                        <Button onClick={() => decommission(null)} disabled={!!busy} variant="outline" size="sm" className="bg-indigo-600/20 border-indigo-500/50 text-indigo-200 hover:bg-indigo-600/30">
+                            {busy === 'dec_all' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Atom className="h-4 w-4 mr-2" />} Decommission → PQ_NATIVE
                         </Button>
                         <Button onClick={refresh} disabled={loading} variant="outline" size="sm" className="bg-slate-800 border-slate-700 hover:bg-slate-700">
                             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
@@ -148,11 +180,13 @@ export default function QuantumReadinessPanel() {
                 )}
 
                 {/* Metrics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <MetricCard icon={KeyRound} label="PQ Keys Issued" value={readiness?.pq_keys_issued ?? '—'} accent="text-violet-300" />
-                    <MetricCard icon={Atom} label="Agents PQ-Only" value={readiness ? `${readiness.agents_pq_only}/${readiness.agents_total}` : '—'} accent="text-violet-300" />
-                    <MetricCard icon={ShieldCheck} label="Agents (Hybrid)" value={readiness ? `${readiness.agents_migrated}/${readiness.agents_total}` : '—'} accent="text-emerald-300" />
+                    <MetricCard icon={Atom} label="Agents PQ-Native" value={readiness ? `${readiness.agents_pq_native}/${readiness.agents_total}` : '—'} accent="text-indigo-300" />
+                    <MetricCard icon={ShieldCheck} label="PQ-Native Coverage" value={readiness?.pq_native_coverage != null ? `${readiness.pq_native_coverage}%` : '—'} accent="text-indigo-300" />
+                    <MetricCard icon={Shield} label="Legacy Archived" value={readiness?.legacy_objects_archived ?? '—'} accent="text-emerald-300" />
                     <MetricCard icon={Shield} label="Legacy Remaining" value={readiness?.legacy_objects_remaining ?? '—'} accent="text-amber-300" />
+                    <MetricCard icon={Zap} label="Runtime Mode" value={readiness?.runtime_crypto_mode ?? '—'} accent="text-violet-300" />
                 </div>
 
                 {/* Surface cards */}
@@ -169,10 +203,19 @@ export default function QuantumReadinessPanel() {
                                     <ProfileBadge status={status} />
                                 </div>
                                 <div className="mt-4 flex gap-2 flex-wrap">
-                                    {status === 'PQ_ONLY' ? (
+                                    {status === 'PQ_NATIVE' ? (
                                         <Button onClick={() => issueKey(s.id)} disabled={!!busy} variant="outline" size="sm" className="bg-slate-700/40 border-slate-600 hover:bg-slate-700">
                                             {busy === s.id ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />} Issue New PQ Key
                                         </Button>
+                                    ) : status === 'PQ_ONLY' ? (
+                                        <>
+                                            <Button onClick={() => decommission(s.id)} disabled={busy === ('dec_' + s.id)} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                                                {busy === ('dec_' + s.id) ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Atom className="h-4 w-4 mr-1" />} Decommission → PQ_NATIVE
+                                            </Button>
+                                            <Button onClick={() => issueKey(s.id)} disabled={!!busy} variant="outline" size="sm" className="bg-slate-700/40 border-slate-600 hover:bg-slate-700">
+                                                <Plus className="h-4 w-4 mr-1" /> New PQ Key
+                                            </Button>
+                                        </>
                                     ) : status === 'HYBRID_V1' ? (
                                         <>
                                             <Button onClick={() => revokeClassical(s.id)} disabled={busy === ('rev_' + s.id)} size="sm" className="bg-red-600 hover:bg-red-700">
@@ -250,7 +293,7 @@ export default function QuantumReadinessPanel() {
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed">
-                    PQ slot uses a deterministic HMAC-SHA256 construction representing ML-DSA-65 (see JIP-QRM-02 §4). Classical slot is real ECDSA P-256 via Web Crypto. Revoking the classical half flips a surface HYBRID_V1 → PQ_ONLY.
+                    PQ slot uses a deterministic HMAC-SHA256 construction representing ML-DSA-65 (see JIP-QRM-03 §4). Classical slot is real ECDSA P-256 via Web Crypto. Revoke → HYBRID_V1→PQ_ONLY; Decommission (archive + seal legacy) → PQ_ONLY→PQ_NATIVE (block_version 3).
                 </p>
             </div>
         </div>

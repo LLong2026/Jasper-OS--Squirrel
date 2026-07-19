@@ -170,11 +170,16 @@ Deno.serve(async (req) => {
       const surfaces = ['threadzero', 'did', 'urib', 'agent_delegation'];
       const surfaceStatus = {};
       let legacyRemaining = 0;
+      let legacyArchived = 0;
       for (const s of surfaces) {
         const activePq = keys.filter((k) => k.surface === s && k.status === 'active' && k.key_type === 'MLDSA65_SIGNING');
         const activeCls = keys.filter((k) => k.surface === s && k.status === 'active' && k.key_type === 'ECDSA_P256_SIGNING');
-        legacyRemaining += keys.filter((k) => k.surface === s && k.key_type === 'ECDSA_P256_SIGNING' && k.status !== 'revoked').length;
-        if (activePq.length > 0 && activeCls.length === 0) surfaceStatus[s] = 'PQ_ONLY';
+        const surfCls = keys.filter((k) => k.surface === s && k.key_type === 'ECDSA_P256_SIGNING');
+        legacyRemaining += surfCls.filter((k) => k.status !== 'revoked').length;
+        legacyArchived += surfCls.filter((k) => k.archived === true).length;
+        const allClsArchived = surfCls.length > 0 && surfCls.every((k) => k.archived === true);
+        if (activePq.length > 0 && activeCls.length === 0 && (surfCls.length === 0 || allClsArchived)) surfaceStatus[s] = 'PQ_NATIVE';
+        else if (activePq.length > 0 && activeCls.length === 0) surfaceStatus[s] = 'PQ_ONLY';
         else if (activePq.length > 0 && activeCls.length > 0) surfaceStatus[s] = 'HYBRID_V1';
         else surfaceStatus[s] = 'pending';
       }
@@ -184,25 +189,35 @@ Deno.serve(async (req) => {
         keys.filter((k) => k.agent_name && k.key_type === 'MLDSA65_SIGNING' && k.status === 'active').map((k) => k.agent_name)
       );
       const pqOnlyAgents = new Set();
+      const pqNativeAgents = new Set();
       for (const a of totalAgents) {
         const hasPq = keys.some((k) => k.agent_name === a && k.key_type === 'MLDSA65_SIGNING' && k.status === 'active');
-        const hasCls = keys.some((k) => k.agent_name === a && k.key_type === 'ECDSA_P256_SIGNING' && k.status === 'active');
-        if (hasPq && !hasCls) pqOnlyAgents.add(a);
+        const hasClsActive = keys.some((k) => k.agent_name === a && k.key_type === 'ECDSA_P256_SIGNING' && k.status === 'active');
+        const agentCls = keys.filter((k) => k.agent_name === a && k.key_type === 'ECDSA_P256_SIGNING');
+        const allArchived = agentCls.length > 0 && agentCls.every((k) => k.archived === true);
+        if (hasPq && !hasClsActive && (agentCls.length === 0 || allArchived)) pqNativeAgents.add(a);
+        else if (hasPq && !hasClsActive) pqOnlyAgents.add(a);
       }
       const coverage = totalAgents.size === 0 ? 0 : Math.round((migratedAgents.size / totalAgents.size) * 100);
-      const allPqOnly = surfaces.every((s) => surfaceStatus[s] === 'PQ_ONLY');
+      const nativeCoverage = totalAgents.size === 0 ? 0 : Math.round((pqNativeAgents.size / totalAgents.size) * 100);
+      const allNative = surfaces.every((s) => surfaceStatus[s] === 'PQ_NATIVE');
+      const allPqOnly = surfaces.every((s) => surfaceStatus[s] === 'PQ_NATIVE' || surfaceStatus[s] === 'PQ_ONLY');
       const anyHybrid = surfaces.some((s) => surfaceStatus[s] === 'HYBRID_V1');
-      const runtimeMode = allPqOnly ? 'PQ_ONLY' : anyHybrid ? 'HYBRID_V1' : 'pending';
+      const runtimeMode = allNative ? 'PQ_NATIVE' : allPqOnly ? 'PQ_ONLY' : anyHybrid ? 'HYBRID_V1' : 'pending';
       return Response.json({
         surfaces: surfaceStatus,
         pq_keys_issued: pqKeys.length,
         agents_migrated: migratedAgents.size,
         agents_pq_only: pqOnlyAgents.size,
+        agents_pq_native: pqNativeAgents.size,
         agents_total: totalAgents.size,
         legacy_objects_remaining: legacyRemaining,
+        legacy_objects_archived: legacyArchived,
         pq_coverage: coverage,
+        pq_native_coverage: nativeCoverage,
         runtime_crypto_mode: runtimeMode,
-        crypto_profile: allPqOnly ? 'PQ_ONLY' : 'HYBRID_V1',
+        runtime_version: 3,
+        crypto_profile: allNative ? 'PQ_NATIVE' : allPqOnly ? 'PQ_ONLY' : anyHybrid ? 'HYBRID_V1' : 'pending',
       });
     }
 
@@ -240,6 +255,52 @@ Deno.serve(async (req) => {
         });
       }
       return Response.json({ revoked: targets.length, runtime_crypto_mode: 'PQ_ONLY' });
+    }
+
+    if (action === 'decommission') {
+      const denied = requireAdmin();
+      if (denied) return denied;
+      const now = Date.now();
+      const targets = body.surface
+        ? await svc.filter({ surface: body.surface, key_type: 'ECDSA_P256_SIGNING' })
+        : await svc.filter({ key_type: 'ECDSA_P256_SIGNING' });
+      let decommissioned = 0;
+      for (const t of targets) {
+        if (t.status === 'active' || t.archived !== true) {
+          await svc.update(t.id, {
+            status: 'revoked',
+            revocation_reason: 'PQ_NATIVE Transition',
+            revocation_date: now,
+            legacy_verification_supported: false,
+            archived: true,
+          });
+          decommissioned++;
+        }
+      }
+      return Response.json({
+        decommissioned,
+        legacy_archived: targets.length,
+        runtime_crypto_mode: 'PQ_NATIVE',
+        runtime_version: 3,
+      });
+    }
+
+    if (action === 'pq_native_sign') {
+      const data = enc.encode(body.payload || '');
+      const pqKey = body.pair_id
+        ? (await svc.filter({ pair_id: body.pair_id, key_type: 'MLDSA65_SIGNING', status: 'active' }))[0]
+        : (await svc.filter({ surface: body.surface, key_type: 'MLDSA65_SIGNING', status: 'active' }))[0];
+      if (!pqKey) return Response.json({ error: 'No active PQ key for surface' }, { status: 400 });
+      const sigPq = await pqSign(pqKey.private_material, data);
+      return Response.json({ sig_pq: sigPq, crypto_profile: 'PQ_NATIVE', block_version: 3, pair_id: pqKey.pair_id });
+    }
+
+    if (action === 'pq_native_verify') {
+      const data = enc.encode(body.payload || '');
+      const pqKey = (await svc.filter({ pair_id: body.pair_id, key_type: 'MLDSA65_SIGNING' }))[0];
+      if (!pqKey) return Response.json({ error: 'PQ key not found' }, { status: 404 });
+      const pv = await pqVerify(pqKey.private_material, body.sig_pq, data);
+      return Response.json({ valid: pv, pq_valid: pv, crypto_profile: 'PQ_NATIVE', block_version: 3 });
     }
 
     if (action === 'list_keys') {

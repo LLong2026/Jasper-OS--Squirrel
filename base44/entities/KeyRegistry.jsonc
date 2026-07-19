@@ -62,7 +62,7 @@
     },
     "revocation_reason": {
       "type": "string",
-      "description": "Reason the key was revoked (e.g. Quantum Migration)"
+      "description": "Reason the key was revoked (e.g. Quantum Migration, PQ_NATIVE Transition)"
     },
     "revocation_date": {
       "type": "number",
@@ -72,6 +72,11 @@
       "type": "boolean",
       "default": true,
       "description": "Whether legacy objects signed by this classical key may still be verified"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once the key is sealed/excluded from active lookup during PQ_NATIVE decommission"
     },
     "rotated_from": {
       "type": "string",
