@@ -1,0 +1,62 @@
+{
+  "name": "AgentIdentity",
+  "type": "object",
+  "properties": {
+    "did": {
+      "type": "string",
+      "description": "Decentralized Identifier (did:jasperv2:<random>)"
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Logical agent name this identity belongs to"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-friendly label"
+    },
+    "public_key": {
+      "type": "string",
+      "description": "Simulated signing public key for truth-anchor verification"
+    },
+    "governance_profile": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Governance rules: voting_weight, scope, authority_level"
+    },
+    "credentials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "default": [],
+      "description": "Verifiable credentials attached to this identity"
+    },
+    "trust_score": {
+      "type": "number",
+      "default": 50,
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Reputation/trust score (0-100)"
+    },
+    "truth_chain_anchor": {
+      "type": "string",
+      "description": "Latest truth anchor (T*) hash this identity committed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "suspended",
+        "revoked"
+      ],
+      "default": "pending",
+      "description": "Identity lifecycle status"
+    }
+  },
+  "required": [
+    "did",
+    "agent_name"
+  ]
+}

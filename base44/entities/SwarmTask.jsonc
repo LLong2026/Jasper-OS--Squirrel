@@ -1,0 +1,77 @@
+{
+  "name": "SwarmTask",
+  "type": "object",
+  "properties": {
+    "swarm_id": {
+      "type": "string",
+      "description": "The swarm this task belongs to"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Unique task identifier within the swarm"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short task title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed task description"
+    },
+    "assigned_dids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "DIDs of agents assigned to execute this task"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "negotiating",
+        "assigned",
+        "in_progress",
+        "review",
+        "completed",
+        "failed"
+      ],
+      "default": "proposed",
+      "description": "Task execution state"
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "default": [],
+      "description": "Proposals submitted by assigned agents during negotiation"
+    },
+    "consensus_reached": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether agents reached consensus on this task"
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Final agreed result for the task"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Execution order within the pipeline"
+    },
+    "created_at": {
+      "type": "number",
+      "description": "Creation timestamp"
+    }
+  },
+  "required": [
+    "swarm_id",
+    "task_id",
+    "title"
+  ]
+}

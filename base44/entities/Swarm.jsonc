@@ -1,0 +1,74 @@
+{
+  "name": "Swarm",
+  "type": "object",
+  "properties": {
+    "swarm_id": {
+      "type": "string",
+      "description": "Unique swarm identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-friendly swarm name"
+    },
+    "goal": {
+      "type": "string",
+      "description": "The objective the swarm collaborates to achieve"
+    },
+    "member_dids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "DIDs of agent identities participating in the swarm"
+    },
+    "topology": {
+      "type": "string",
+      "enum": [
+        "mesh",
+        "star",
+        "hierarchical",
+        "ring"
+      ],
+      "default": "mesh",
+      "description": "Collaboration topology between members"
+    },
+    "coordinator_did": {
+      "type": "string",
+      "description": "DID of the coordinating agent identity"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "forming",
+        "active",
+        "deliberating",
+        "executing",
+        "completed",
+        "failed"
+      ],
+      "default": "forming",
+      "description": "Swarm lifecycle status"
+    },
+    "consensus_threshold": {
+      "type": "number",
+      "default": 0.6,
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction of agreement required to reach consensus"
+    },
+    "result_summary": {
+      "type": "string",
+      "description": "Final synthesized outcome once the swarm completes"
+    },
+    "created_at": {
+      "type": "number",
+      "description": "Creation timestamp"
+    }
+  },
+  "required": [
+    "swarm_id",
+    "name",
+    "goal"
+  ]
+}
