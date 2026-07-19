@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { createAgent } from '@/functions/createAgent';
-import { Send, Loader2, Sparkles, AlertCircle, Copy, Check, Cpu, Download, Mic, MicOff, Volume2, VolumeX, Radio, Box } from 'lucide-react';
+import { Send, Loader2, Sparkles, AlertCircle, Copy, Check, Cpu, Download, Mic, MicOff, Volume2, VolumeX, Radio, Box, Monitor, Paperclip } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,6 +16,8 @@ import SystemHeartbeat from '@/components/SystemHeartbeat';
 import ImageGeneratorPanel from '@/components/ImageGeneratorPanel';
 import ModelSelector, { MODELS } from '@/components/capabilities/ModelSelector';
 import AIControlsPanel from '@/components/chat/AIControlsPanel';
+import FileDropZone from '@/components/chat/FileDropZone';
+import ScreenSharePanel from '@/components/chat/ScreenSharePanel';
 import { Settings2 } from 'lucide-react';
 
 const ProofBadge = ({ proof }) => {
@@ -205,6 +207,7 @@ export default function ChatPage() {
   const [preferredModel, setPreferredModel] = useState(() => localStorage.getItem('jasper_preferred_model') || 'auto');
   const [directLLMMode, setDirectLLMMode] = useState(() => localStorage.getItem('jasper_direct_llm') === 'true');
   const [showAIControls, setShowAIControls] = useState(false);
+  const [showScreenShare, setShowScreenShare] = useState(false);
   const [memorySummary, setMemorySummary] = useState('');
   const memoryInjectedRef = useRef(false);
   const lastConsolidateRef = useRef(0);
@@ -910,6 +913,44 @@ export default function ChatPage() {
     }
   };
 
+  // Send an uploaded file (drag-drop or screen capture) to Jasper as a user message with file_urls
+  const sendFileToJasper = useCallback(async (fileUrl, label) => {
+    if (!conversation) return;
+    setIsLoading(true);
+    try {
+      const userMessage = {
+        role: 'user',
+        content: label,
+        image_url: fileUrl,
+      };
+      setMessages(prev => [...prev, userMessage]);
+      await base44.agents.addMessage(conversation, {
+        role: 'user',
+        content: label,
+        file_urls: [fileUrl],
+      });
+    } catch (err) {
+      console.error('Send file error:', err);
+      setError('Failed to share content with Jasper.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [conversation, setMessages, setIsLoading, setError]);
+
+  const handleFilesUploaded = useCallback(async (uploaded) => {
+    for (const f of uploaded) {
+      const isImage = /\.(png|jpg|jpeg|gif|webp)$/i.test(f.file_name);
+      const label = isImage
+        ? `I've shared an image (${f.file_name}) — take a look and let me know what you see.`
+        : `I've shared a file (${f.file_name}) — please review and help with it.`;
+      await sendFileToJasper(f.file_url, label);
+    }
+  }, [sendFileToJasper]);
+
+  const handleScreenCapture = useCallback(async (fileUrl) => {
+    await sendFileToJasper(fileUrl, "Here's a capture of my screen — what do you see? Help me with what's on it.");
+  }, [sendFileToJasper]);
+
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-slate-100">
       <AegisHeartbeat />
@@ -930,6 +971,11 @@ export default function ChatPage() {
         onModelChange={handleModelChange}
         directLLMMode={directLLMMode}
         onDirectLLMModeChange={toggleDirectLLMMode}
+      />
+      <ScreenSharePanel
+        open={showScreenShare}
+        onClose={() => setShowScreenShare(false)}
+        onCaptureSent={async (url) => { await handleScreenCapture(url); }}
       />
       <header className="p-4 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center justify-between w-full">
@@ -985,27 +1031,29 @@ export default function ChatPage() {
         </div>
       </header>
 
-      <main ref={scrollAreaRef} className="flex-1 overflow-y-auto p-6 space-y-6">
-        {messages.map((msg, index) => (
-          <Message key={index} message={msg} onDeploy={handleDeployAgent} showProof={showProof} />
-        ))}
-        {isLoading && messages.length > 0 && (
-          <div className="flex gap-4 justify-start items-center">
-             <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-blue-500/50 shadow-[0_0_12px_2px_rgba(59,130,246,0.6)]">
-               <img 
-                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693d9a99ca82e178be7bca1b/e908cc8ba_arthur-artwork-1765675024047.png" 
-                 alt="Jasper AI" 
-                 className="w-full h-full object-cover"
-               />
-             </div>
-            <div className="px-4 py-3 rounded-2xl bg-slate-800 flex items-center gap-2">
-              <span className="h-2 w-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
-              <span className="h-2 w-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
-              <span className="h-2 w-2 bg-slate-400 rounded-full animate-pulse"></span>
+      <FileDropZone onFilesUploaded={handleFilesUploaded} disabled={!conversation || isLoading}>
+        <main ref={scrollAreaRef} className="flex-1 overflow-y-auto p-6 space-y-6">
+          {messages.map((msg, index) => (
+            <Message key={index} message={msg} onDeploy={handleDeployAgent} showProof={showProof} />
+          ))}
+          {isLoading && messages.length > 0 && (
+            <div className="flex gap-4 justify-start items-center">
+               <div className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-blue-500/50 shadow-[0_0_12px_2px_rgba(59,130,246,0.6)]">
+                 <img 
+                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693d9a99ca82e178be7bca1b/e908cc8ba_arthur-artwork-1765675024047.png" 
+                   alt="Jasper AI" 
+                   className="w-full h-full object-cover"
+                 />
+               </div>
+              <div className="px-4 py-3 rounded-2xl bg-slate-800 flex items-center gap-2">
+                <span className="h-2 w-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                <span className="h-2 w-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                <span className="h-2 w-2 bg-slate-400 rounded-full animate-pulse"></span>
+              </div>
             </div>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </FileDropZone>
 
       <footer className="p-4 border-t border-slate-800">
         {error && (
@@ -1026,6 +1074,15 @@ export default function ChatPage() {
               disabled={!conversation || isLoading || isListening}
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+              <Button
+                size="icon"
+                className="bg-slate-700 hover:bg-slate-600 disabled:bg-slate-600"
+                onClick={() => setShowScreenShare(true)}
+                disabled={!conversation || isLoading}
+                title="Share your screen with Jasper"
+              >
+                <Monitor className="w-4 h-4" />
+              </Button>
               <Button
                 size="icon"
                 className="bg-slate-700 hover:bg-slate-600 disabled:bg-slate-600"
