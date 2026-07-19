@@ -19,6 +19,7 @@ import AreteEngine from './pages/AreteEngine';
 import GoLive from './pages/GoLive';
 import About from './pages/About';
 import Readme from './pages/Readme';
+import Landing from './pages/Landing';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -130,6 +131,11 @@ const AuthenticatedApp = () => {
       <Route path="/Readme" element={
         <LayoutWrapper currentPageName="Readme">
           <Readme />
+        </LayoutWrapper>
+      } />
+      <Route path="/Landing" element={
+        <LayoutWrapper currentPageName="Landing">
+          <Landing />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />

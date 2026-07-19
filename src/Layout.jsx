@@ -12,6 +12,7 @@ export default function Layout({ children, currentPageName }) {
         {
             title: 'Core', icon: Bot, accent: 'text-blue-400', defaultOpen: true,
             items: [
+                { name: 'Landing', href: createPageUrl('Landing'), icon: Rocket },
                 { name: 'Chat', href: createPageUrl('Chat'), icon: Bot },
                 { name: 'AgentCreator', href: createPageUrl('AgentCreator'), icon: Sparkles },
                 { name: 'IntegrationHub', href: createPageUrl('IntegrationHub'), icon: Plug },
