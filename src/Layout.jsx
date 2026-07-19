@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio, Workflow, Coins, Heart, Cpu, Rocket, Info } from 'lucide-react';
+import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio, Workflow, Coins, Heart, Cpu, Rocket, Info, BookOpen } from 'lucide-react';
 import CollapsibleSection from '@/components/ui/CollapsibleSection';
 import LegalFooter from '@/components/legal/LegalFooter';
 
@@ -54,6 +54,7 @@ export default function Layout({ children, currentPageName }) {
             items: [
                 { name: 'GoLive', href: createPageUrl('GoLive'), icon: Rocket },
                 { name: 'About', href: createPageUrl('About'), icon: Info },
+                { name: 'Readme', href: createPageUrl('Readme'), icon: BookOpen },
                 { name: 'GitHubExport', href: createPageUrl('GitHubExport'), icon: GitBranch },
                 { name: 'CinematicDashboard', href: createPageUrl('CinematicDashboard'), icon: Sparkles },
                 { name: 'AuroraArchitecture', href: createPageUrl('AuroraArchitecture'), icon: Zap },

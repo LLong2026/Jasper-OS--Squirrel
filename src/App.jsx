@@ -18,6 +18,7 @@ import AegisSelfHealing from './pages/AegisSelfHealing';
 import AreteEngine from './pages/AreteEngine';
 import GoLive from './pages/GoLive';
 import About from './pages/About';
+import Readme from './pages/Readme';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -124,6 +125,11 @@ const AuthenticatedApp = () => {
       <Route path="/About" element={
         <LayoutWrapper currentPageName="About">
           <About />
+        </LayoutWrapper>
+      } />
+      <Route path="/Readme" element={
+        <LayoutWrapper currentPageName="Readme">
+          <Readme />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />

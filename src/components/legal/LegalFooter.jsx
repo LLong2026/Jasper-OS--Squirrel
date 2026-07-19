@@ -9,9 +9,22 @@ export default function LegalFooter() {
           <Shield className="h-3 w-3 shrink-0 mt-0.5 text-slate-600" />
           <div className="space-y-1">
             <p>
-              <span className="text-slate-400 font-medium">Copyright © 2026 Jasper OS.</span> All rights reserved. 
-              Jasper, Aegis, Arete, URIB, Chronos Daemon, and the Jasper logo are trademarks of Jasper OS. 
+              <span className="text-slate-400 font-medium">Copyright © 2026 Leon Calvin Long II.</span> All rights reserved. 
+              Jasper, Aegis, Arete, URIB, Chronos Daemon, and the Jasper logo are trademarks of Leon Calvin Long II. 
               All other trademarks, service marks, and trade names referenced herein are the property of their respective owners.
+            </p>
+            <p>
+              <span className="text-slate-400 font-medium">Content License:</span> All creative content, documentation, designs, and non-code materials are licensed under 
+              Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0). 
+              You may share (copy and redistribute) this material in any medium or format for non-commercial purposes only, 
+              provided you give appropriate credit to Leon Calvin Long II, indicate if changes were made, and distribute under the same license. 
+              No derivatives — you may not adapt, transform, or build upon this material. Commercial use is strictly prohibited without explicit written permission.
+            </p>
+            <p>
+              <span className="text-slate-400 font-medium">Code License:</span> All source code is licensed under the Apache License, Version 2.0. 
+              You may use, reproduce, and distribute the code subject to the terms of the Apache 2.0 license, including the requirement to retain 
+              the copyright notice, include a copy of the license, and state any significant changes made to the licensed files. 
+              See the full license text at https://www.apache.org/licenses/LICENSE-2.0.
             </p>
             <p>
               <span className="text-slate-400 font-medium">Disclaimer:</span> This software is provided "as is" without warranty of any kind, express or implied, 
