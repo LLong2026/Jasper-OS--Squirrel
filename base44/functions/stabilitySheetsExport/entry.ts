@@ -25,6 +25,7 @@ Deno.serve(async (req) => {
     let lastAlertsTs = state?.content?.last_alerts_ts || 0;
     let lastAnomaliesTs = state?.content?.last_anomalies_ts || 0;
     let lastHealingTs = state?.content?.last_healing_ts || 0;
+    let lastOptimizationsTs = state?.content?.last_optimizations_ts || 0;
 
     // --- Create spreadsheet + headers on first run ---
     if (!spreadsheetId) {
@@ -36,6 +37,7 @@ Deno.serve(async (req) => {
             { properties: { title: 'SettlementAlerts' } },
             { properties: { title: 'AegisAnomalies' } },
             { properties: { title: 'HealingEvents' } },
+            { properties: { title: 'OptimizationEvents' } },
           ]
         })
       });
@@ -57,6 +59,10 @@ Deno.serve(async (req) => {
       await fetch(`${SHEETS_API}/${spreadsheetId}/values/HealingEvents!A1:append?valueInputOption=RAW`, {
         method: 'POST', headers,
         body: JSON.stringify({ values: [['event_id', 'anomaly_id', 'playbook_id', 'playbook_name', 'status', 'trigger', 'execution_time_ms', 'result_summary', 'started_at_iso', 'completed_at_iso', 'exported_at']] })
+      });
+      await fetch(`${SHEETS_API}/${spreadsheetId}/values/OptimizationEvents!A1:append?valueInputOption=RAW`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ values: [['proposal_id', 'optimization_type', 'source_agent', 'target_agent', 'risk_level', 'status', 'impact_score', 'expected_improvement', 'proposed_changes', 'actual_results', 'created_at_iso', 'completed_at_iso', 'exported_at']] })
       });
     }
 
@@ -118,15 +124,40 @@ Deno.serve(async (req) => {
       if (appendRes.ok) healingExported = newHealing.length;
     }
 
+    // --- Query new Arete optimization proposals (ascending by created_at) ---
+    const allOptimizations = await svc.OptimizationEvent.list('created_at', 500);
+    const newOptimizations = allOptimizations.filter(o => (o.created_at || 0) > lastOptimizationsTs);
+    let optimizationsExported = 0;
+
+    if (newOptimizations.length > 0) {
+      const rows = newOptimizations.map(o => [
+        o.proposal_id || '', o.optimization_type || '', o.source_agent || '',
+        o.target_agent || '', o.risk_level || '', o.status || '',
+        o.impact_score ?? '',
+        JSON.stringify(o.expected_improvement || {}),
+        JSON.stringify(o.proposed_changes || {}),
+        JSON.stringify(o.actual_results || {}),
+        o.created_at ? new Date(o.created_at).toISOString() : '',
+        o.completed_at ? new Date(o.completed_at).toISOString() : '',
+        new Date(now).toISOString()
+      ]);
+      const appendRes = await fetch(`${SHEETS_API}/${spreadsheetId}/values/OptimizationEvents!A:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+        method: 'POST', headers, body: JSON.stringify({ values: rows })
+      });
+      if (appendRes.ok) optimizationsExported = newOptimizations.length;
+    }
+
     // --- Update export state ---
     const maxAlertsTs = newAlerts.length > 0 ? Math.max(...newAlerts.map(a => a.detected_at || 0)) : lastAlertsTs;
     const maxAnomaliesTs = newAnomalies.length > 0 ? Math.max(...newAnomalies.map(a => a.detected_at || 0)) : lastAnomaliesTs;
     const maxHealingTs = newHealing.length > 0 ? Math.max(...newHealing.map(h => h.started_at || 0)) : lastHealingTs;
+    const maxOptimizationsTs = newOptimizations.length > 0 ? Math.max(...newOptimizations.map(o => o.created_at || 0)) : lastOptimizationsTs;
     const newStateContent = {
       spreadsheet_id: spreadsheetId,
       last_alerts_ts: maxAlertsTs,
       last_anomalies_ts: maxAnomaliesTs,
       last_healing_ts: maxHealingTs,
+      last_optimizations_ts: maxOptimizationsTs,
       last_export_at: now,
     };
 
@@ -147,6 +178,7 @@ Deno.serve(async (req) => {
       alerts_exported: alertsExported,
       anomalies_exported: anomaliesExported,
       healing_events_exported: healingExported,
+      optimization_events_exported: optimizationsExported,
       last_export_at: new Date(now).toISOString(),
     });
   } catch (error) {
