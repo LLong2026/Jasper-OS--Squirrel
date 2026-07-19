@@ -1,0 +1,114 @@
+{
+  "name": "AegisAnomaly",
+  "type": "object",
+  "properties": {
+    "anomaly_id": {
+      "type": "string",
+      "description": "Unique anomaly identifier"
+    },
+    "anomaly_type": {
+      "type": "string",
+      "enum": [
+        "high_latency",
+        "resource_exhaustion",
+        "quantum_vulnerability_detected",
+        "post_quantum_migration_needed",
+        "traffic_anomaly",
+        "database_degradation",
+        "config_drift",
+        "cascading_failure",
+        "canary_failure",
+        "rate_limit_abuse",
+        "service_unreachable",
+        "entity_error",
+        "integration_degraded",
+        "data_corruption"
+      ],
+      "description": "Type of anomaly detected by the Monitor"
+    },
+    "category": {
+      "type": "string",
+      "description": "functional category (security, data, performance, infra)"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "component": {
+      "type": "string",
+      "description": "Component/entity where the anomaly was detected"
+    },
+    "description": {
+      "type": "string"
+    },
+    "detected_at": {
+      "type": "number",
+      "description": "Detection timestamp (ms)"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Observed metrics at detection time"
+    },
+    "root_cause": {
+      "type": "string",
+      "description": "LLM-diagnosed root cause"
+    },
+    "playbook_id": {
+      "type": "string",
+      "description": "Selected remediation playbook"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Analyzer confidence (0-1)"
+    },
+    "vulnerable_algorithm": {
+      "type": "string",
+      "description": "Quantum-vulnerable algorithm in use"
+    },
+    "quantum_threat_level": {
+      "type": "string",
+      "enum": [
+        "imminent",
+        "high_risk",
+        "medium_risk",
+        "low_risk"
+      ]
+    },
+    "suggested_pqc_algorithm": {
+      "type": "string",
+      "description": "Recommended post-quantum algorithm"
+    },
+    "estimated_break_year": {
+      "type": "number",
+      "description": "Estimated year a quantum computer could break this algorithm"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "detected",
+        "analyzing",
+        "healing",
+        "resolved",
+        "failed",
+        "acknowledged"
+      ],
+      "default": "detected"
+    },
+    "healing_event_id": {
+      "type": "string",
+      "description": "Linked healing event"
+    }
+  },
+  "required": [
+    "anomaly_type",
+    "severity",
+    "component"
+  ]
+}

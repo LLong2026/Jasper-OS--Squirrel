@@ -1,0 +1,86 @@
+{
+  "name": "SystemHealth",
+  "type": "object",
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "description": "Unique snapshot identifier"
+    },
+    "health_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 100
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "degraded",
+        "critical",
+        "recovering"
+      ],
+      "default": "healthy"
+    },
+    "heartbeat_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cumulative heartbeat pulses"
+    },
+    "active_anomalies": {
+      "type": "number",
+      "default": 0
+    },
+    "resolved_anomalies": {
+      "type": "number",
+      "default": 0
+    },
+    "total_healing_events": {
+      "type": "number",
+      "default": 0
+    },
+    "successful_heals": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_recovery_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "success_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Healing success rate (0-1)"
+    },
+    "pqc_readiness_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 50
+    },
+    "vulnerable_crypto_count": {
+      "type": "number",
+      "default": 0
+    },
+    "entities_checked": {
+      "type": "number",
+      "default": 0
+    },
+    "functions_inventory": {
+      "type": "number",
+      "default": 0
+    },
+    "chronos_vitality": {
+      "type": "number",
+      "default": 1,
+      "description": "Data integrity vitality score (0-1)"
+    },
+    "timestamp": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "health_score",
+    "status"
+  ]
+}

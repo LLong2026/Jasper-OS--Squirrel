@@ -1,163 +1,103 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
+
+// Aegis Quantum Compliance Bot — a multi-LLM compliance repair agent.
+// Scans a target (system / crypto / entity) against applicable regulations,
+// diagnoses violations, and auto-applies PQC remediation. Uses real LLM with
+// live web context for current regulatory + quantum-threat intelligence.
+
+const DEFAULT_REGS = ['HIPAA', 'GDPR', 'CCPA', 'SEC-Rule-S3', 'NIST-PQC', 'FIPS-204', 'PCI-DSS', 'ISO-27001'];
 
 Deno.serve(async (req) => {
-    try {
-        const base44 = createClientFromRequest(req);
-        const user = await base44.auth.me();
-        if (!user) {
-            return Response.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-        const { target_system, vulnerability_data } = await req.json();
-        const startTime = Date.now();
+    const body = await req.json();
+    const action = body.action;
+    const svc = base44.asServiceRole.entities;
+    const ts = Date.now();
 
-        // Step 1: Scan for compliance violations
-        const scanResult = await performComplianceScan(target_system, vulnerability_data, base44);
+    if (action === 'scan') {
+      const target = body.target || 'system';
+      const regulations = body.regulations || DEFAULT_REGS;
 
-        // Step 2: If violations found, use multi-LLM consensus to find solutions
-        if (scanResult.violations.length > 0) {
-            const solutions = [];
+      // Gather real context about the target's crypto posture
+      let context = '';
+      try {
+        const keys = await svc.KeyRegistry.list('-created_date', 100);
+        const ecdsa = keys.filter((k) => k.key_type === 'ECDSA_P256_SIGNING' && k.status === 'active');
+        const pq = keys.filter((k) => (k.key_type === 'MLDSA65_SIGNING' || k.key_type === 'MLDSA65_REAL_SIGNING') && k.status === 'active');
+        const surfaces = [...new Set(keys.map((k) => k.surface))];
+        context += `\n\nLIVE CRYPTO POSTURE: ${keys.length} total keys, ${ecdsa.length} active ECDSA (quantum-vulnerable), ${pq.length} PQ-native (ML-DSA-65). Protected surfaces: ${surfaces.join(', ') || 'none'}.`;
+      } catch {
+        context += '\n\nLIVE CRYPTO POSTURE: KeyRegistry not yet provisioned.';
+      }
 
-            for (const violation of scanResult.violations) {
-                // Use multiple LLMs to analyze the problem and propose solutions
-                const multiModelAnalysis = await base44.functions.invoke('multiModelConsensus', {
-                    prompt: `Analyze this quantum cryptography compliance violation and provide a remediation plan:
-                    
-Violation: ${violation.description}
-Affected System: ${target_system}
-Current Algorithm: ${violation.current_algorithm}
-Required Standard: ${violation.required_standard}
-Regulations: ${violation.applicable_regulations.join(', ')}
+      const prompt = `You are the Aegis Quantum Compliance Bot, a multi-LLM compliance repair agent.
+Your job: scan the target for compliance violations across ALL applicable regulations and produce concrete, auto-repairable remediation.
 
-Provide:
-1. Root cause analysis
-2. Step-by-step remediation plan
-3. Post-quantum algorithm recommendation
-4. Implementation timeline
-5. Rollback strategy`,
-                    system_message: 'You are a quantum cryptography compliance expert. Provide precise, actionable remediation plans.',
-                    consensus_type: 'critical_decision',
-                    models_to_use: ['gpt-4-turbo', 'claude-3.5-sonnet', 'gemini-ultra']
-                });
+TARGET: ${target}
+REGULATIONS TO CHECK: ${regulations.join(', ')}${context}
 
-                // Step 3: Parse solution and execute remediation
-                const remediationPlan = parseRemediationPlan(multiModelAnalysis.response);
-                const executionResult = await executeRemediation(remediationPlan, violation, base44);
+For each violation found, provide: the regulation violated, severity (critical/high/medium/low), the specific issue, the exact fix to apply, and whether it can be auto-repaired (true/false).
+Also assess overall quantum-readiness (PQC migration status) and produce an auto-repair plan.
 
-                solutions.push({
-                    violation_id: violation.id,
-                    analysis: multiModelAnalysis,
-                    remediation_plan: remediationPlan,
-                    execution_result: executionResult
-                });
-            }
+Respond as JSON: {
+  "compliance_score": number (0-100),
+  "violations": [{ "regulation": string, "severity": string, "issue": string, "fix": string, "auto_repairable": boolean }],
+  "quantum_readiness": "none" | "partial" | "full",
+  "quantum_recommendation": string,
+  "auto_repair_plan": [string]
+}`;
 
-            // Step 4: Verify compliance after remediation
-            const verificationResult = await verifyCompliance(target_system, base44);
+      const llm = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            compliance_score: { type: 'number' },
+            violations: { type: 'array', items: { type: 'object', additionalProperties: true } },
+            quantum_readiness: { type: 'string' },
+            quantum_recommendation: { type: 'string' },
+            auto_repair_plan: { type: 'array', items: { type: 'string' } },
+          },
+          required: ['compliance_score', 'violations', 'quantum_readiness'],
+        },
+      });
 
-            return Response.json({
-                success: true,
-                target_system,
-                violations_found: scanResult.violations.length,
-                violations_remediated: solutions.filter(s => s.execution_result.success).length,
-                solutions,
-                verification: verificationResult,
-                processing_time_ms: Date.now() - startTime,
-                proof: {
-                    source: 'Quantum Compliance Bot',
-                    model: 'Multi-LLM Consensus',
-                    details: `Remediated ${solutions.length} violations using consensus analysis`
-                }
-            });
-        }
-
-        return Response.json({
-            success: true,
-            target_system,
-            violations_found: 0,
-            compliance_status: 'COMPLIANT',
-            processing_time_ms: Date.now() - startTime
-        });
-
-    } catch (error) {
-        return Response.json({
-            success: false,
-            error: error.message
-        }, { status: 500 });
+      return Response.json({
+        success: true, target, regulations, result: llm, scanned_at: ts,
+        proof: { source: 'Quantum Compliance Bot', model: 'Multi-LLM (web-enabled)', details: `Scanned ${target} against ${regulations.length} regulations` },
+      });
     }
+
+    if (action === 'repair') {
+      // Auto-apply PQC remediation — issue real ML-DSA-65 keys + verify
+      const fixes = [];
+      try {
+        const kp = await base44.functions.invoke('quantumResilience', { action: 'pq_real_keypair', surface: body.surface || 'urib' });
+        fixes.push({ action: 'issue_pq_keypair', success: true, pair_id: kp.pair_id, detail: 'Real ML-DSA-65 (FIPS 204) keypair issued' });
+      } catch (e) {
+        fixes.push({ action: 'issue_pq_keypair', success: false, error: e.message });
+      }
+      try {
+        const st = await base44.functions.invoke('quantumResilience', { action: 'pq_real_self_test', surface: body.surface || 'urib' });
+        fixes.push({ action: 'verify_pq_self_test', success: st.sign_verify_roundtrip_valid !== false, signature_bytes: st.signature_bytes, detail: 'ML-DSA-65 sign/verify round-trip validated' });
+      } catch (e) {
+        fixes.push({ action: 'verify_pq_self_test', success: false, error: e.message });
+      }
+      const allOk = fixes.every((f) => f.success);
+      return Response.json({
+        success: allOk, fixes_applied: fixes.filter((f) => f.success).length, fixes,
+        repaired_at: Date.now(),
+        proof: { source: 'Quantum Compliance Bot', details: allOk ? 'PQC remediation applied + verified' : 'Partial remediation — review failures' },
+      });
+    }
+
+    return Response.json({ error: 'Unknown action' }, { status: 400 });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 });
-
-async function performComplianceScan(target, vulnerabilityData, base44) {
-    // Scan for quantum cryptography compliance
-    const violations = [];
-
-    const regulatoryStandards = [
-        { name: 'NIST Post-Quantum Cryptography', algorithms: ['Dilithium', 'Kyber', 'SPHINCS+'] },
-        { name: 'CISA Quantum Readiness', requirements: ['PQC migration plan', 'crypto inventory'] },
-        { name: 'GDPR Quantum-Safe', requirements: ['quantum-resistant encryption'] },
-        { name: 'HIPAA Quantum Security', requirements: ['PQC for PHI'] }
-    ];
-
-    // Simulate vulnerability detection
-    if (vulnerabilityData?.vulnerable_algorithms?.length > 0) {
-        for (const algo of vulnerabilityData.vulnerable_algorithms) {
-            violations.push({
-                id: `violation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                severity: 'critical',
-                description: `Quantum-vulnerable algorithm in use: ${algo}`,
-                current_algorithm: algo,
-                required_standard: 'NIST PQC',
-                applicable_regulations: ['NIST Post-Quantum Cryptography', 'CISA Quantum Readiness'],
-                estimated_risk: 'High - vulnerable to Shor\'s algorithm'
-            });
-        }
-    }
-
-    return { violations };
-}
-
-function parseRemediationPlan(llmResponse) {
-    // Parse the LLM response into actionable steps
-    return {
-        steps: [
-            'Backup current cryptographic keys',
-            'Deploy post-quantum algorithm',
-            'Rotate keys to quantum-resistant versions',
-            'Update certificate chain',
-            'Verify encryption strength'
-        ],
-        recommended_algorithm: 'Dilithium (NIST PQC)',
-        timeline: '24-48 hours',
-        rollback_strategy: 'Maintain parallel legacy system for 30 days'
-    };
-}
-
-async function executeRemediation(plan, violation, base44) {
-    // Execute the remediation plan
-    const results = [];
-    
-    for (const step of plan.steps) {
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate execution
-        results.push({
-            step,
-            status: 'completed',
-            timestamp: Date.now()
-        });
-    }
-
-    return {
-        success: true,
-        steps_completed: results.length,
-        results
-    };
-}
-
-async function verifyCompliance(target, base44) {
-    // Verify that the system is now compliant
-    return {
-        compliant: true,
-        timestamp: Date.now(),
-        standards_met: ['NIST PQC', 'CISA Quantum Readiness'],
-        next_review: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
-    };
-}

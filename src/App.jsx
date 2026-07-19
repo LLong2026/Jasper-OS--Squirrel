@@ -14,6 +14,7 @@ import BridgeVisualizer from './pages/BridgeVisualizer';
 import SwarmConsole from './pages/SwarmConsole';
 import QuantumReadinessPanel from './pages/QuantumReadinessPanel';
 import TokenStudio from './pages/TokenStudio';
+import AegisSelfHealing from './pages/AegisSelfHealing';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -100,6 +101,11 @@ const AuthenticatedApp = () => {
       <Route path="/TokenStudio" element={
         <LayoutWrapper currentPageName="TokenStudio">
           <TokenStudio />
+        </LayoutWrapper>
+      } />
+      <Route path="/AegisSelfHealing" element={
+        <LayoutWrapper currentPageName="AegisSelfHealing">
+          <AegisSelfHealing />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />

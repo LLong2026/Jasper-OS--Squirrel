@@ -1,45 +1,53 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
+
+// Aegis Heartbeat (The Chronos Daemon) — the 10-second autonomous pulse.
+// Runs a full Monitor → Analyzer → Actuator cycle on every tick, persisting
+// real health state and triggering real healing. Called from the browser.
 
 Deno.serve(async (req) => {
-    try {
-        const base44 = createClientFromRequest(req);
-        const user = await base44.auth.me();
-        if (!user) {
-            return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const body = await req.json().catch(() => ({}));
+    const ts = Date.now();
+
+    // 1. Monitor sweep
+    const monitorRaw = await base44.functions.invoke('aegisMonitor', { action: 'scan' });
+    const monitor = monitorRaw.data || monitorRaw;
+
+    // 2. Analyze + heal each detected anomaly (real LLM diagnosis + playbook execution)
+    const healed = [];
+    const anomalies = monitor.anomalies || [];
+    if (anomalies.length > 0) {
+      for (const anomaly of anomalies) {
+        try {
+          const analysisRaw = await base44.functions.invoke('aegisAnalyzer', { action: 'analyze', anomaly });
+          const analysis = analysisRaw.data || analysisRaw;
+          if (analysis.playbook_id) {
+            const healRaw = await base44.functions.invoke('aegisActuator', {
+              action: 'execute', anomaly, playbook_id: analysis.playbook_id, trigger: 'automatic',
+            });
+            const heal = healRaw.data || healRaw;
+            healed.push({ anomaly_id: anomaly.id, playbook: analysis.playbook_id, success: heal.success });
+          }
+        } catch (e) {
+          healed.push({ anomaly_id: anomaly.id, error: e.message });
         }
-
-        const { session_id } = await req.json();
-        const timestamp = Date.now();
-
-        // Trigger monitoring sweep
-        const monitorResult = await base44.functions.invoke('aegisMonitor', {});
-        
-        // If anomalies detected, trigger analysis
-        if (monitorResult.anomalies && monitorResult.anomalies.length > 0) {
-            for (const anomaly of monitorResult.anomalies) {
-                await base44.functions.invoke('aegisAnalyzer', { anomaly });
-            }
-        }
-
-        return Response.json({
-            success: true,
-            session_id,
-            timestamp,
-            pulse: 'active',
-            system_status: monitorResult.overall_health,
-            anomalies_detected: monitorResult.anomalies?.length || 0,
-            proof: {
-                source: 'Aegis Heartbeat',
-                model: 'Autonomous Monitor',
-                details: `Pulse at ${new Date(timestamp).toISOString()}`
-            }
-        });
-
-    } catch (error) {
-        return Response.json({
-            success: false,
-            error: error.message,
-            pulse: 'degraded'
-        }, { status: 500 });
+      }
     }
+
+    return Response.json({
+      success: true, session_id: body.session_id, timestamp: ts, pulse: 'active',
+      system_status: monitor.overall_health, health_score: monitor.health_score,
+      heartbeat_count: monitor.heartbeat_count,
+      anomalies_detected: anomalies.length,
+      healed: healed.length, healing_results: healed,
+      metrics: monitor.metrics, checks: monitor.checks,
+      proof: { source: 'Aegis Heartbeat (Chronos Daemon)', details: `Pulse at ${new Date(ts).toISOString()}` },
+    });
+  } catch (error) {
+    return Response.json({ success: false, error: error.message, pulse: 'degraded' }, { status: 500 });
+  }
 });

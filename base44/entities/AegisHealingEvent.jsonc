@@ -1,0 +1,67 @@
+{
+  "name": "AegisHealingEvent",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Unique healing event identifier"
+    },
+    "anomaly_id": {
+      "type": "string",
+      "description": "Anomaly that triggered this healing event"
+    },
+    "playbook_id": {
+      "type": "string",
+      "description": "Playbook executed"
+    },
+    "playbook_name": {
+      "type": "string"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "default": [],
+      "description": "Step-by-step execution log of each action"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "started",
+        "executing",
+        "success",
+        "failed",
+        "rolled_back"
+      ],
+      "default": "started"
+    },
+    "execution_time_ms": {
+      "type": "number",
+      "description": "Total execution duration"
+    },
+    "started_at": {
+      "type": "number"
+    },
+    "completed_at": {
+      "type": "number"
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "automatic",
+        "manual",
+        "quantum_compliance"
+      ],
+      "default": "automatic"
+    },
+    "result_summary": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "playbook_id",
+    "status"
+  ]
+}
