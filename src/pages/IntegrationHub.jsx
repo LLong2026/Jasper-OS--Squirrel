@@ -23,6 +23,7 @@ import {
     TrendingUp,
     Landmark
 } from 'lucide-react';
+import ConfigureModal from '@/components/IntegrationHub/ConfigureModal';
 
 const integrations = [
     { id: 'gmail', name: 'Gmail', icon: Mail, category: 'Communication', status: 'active', function: 'gmailIntegration' },
@@ -42,6 +43,7 @@ export default function IntegrationHub() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [testResults, setTestResults] = useState({});
+    const [configuring, setConfiguring] = useState(null);
 
     const categories = ['all', ...new Set(integrations.map(i => i.category))];
 
@@ -75,8 +77,7 @@ export default function IntegrationHub() {
     };
 
     const configureIntegration = (integration) => {
-        const configUrl = `/settings/integrations/${integration.id}`;
-        alert(`✅ ${integration.name} is ready to use!\n\nBackend function: ${integration.function}\n\nAvailable actions depend on the integration.\nExample: invoke('${integration.function}', { action: 'send_message', payload: {...} })`);
+        setConfiguring(integration);
     };
 
     const getIconComponent = (icon) => icon;
@@ -186,6 +187,15 @@ export default function IntegrationHub() {
                     </div>
                 )}
             </div>
+
+            {configuring && (
+                <ConfigureModal
+                    integration={configuring}
+                    testStatus={testResults[configuring.id]}
+                    onTest={() => testIntegration(configuring)}
+                    onClose={() => setConfiguring(null)}
+                />
+            )}
         </div>
     );
 }
