@@ -68,6 +68,15 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
     liveTimerRef.current = setInterval(tick, LIVE_INTERVAL_MS);
   }, [captureFrame, onLiveFrame]);
 
+  const stopShare = useCallback(() => {
+    stopLive();
+    const s = streamRef.current;
+    if (s) s.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
+    setStream(null);
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }, [stopLive]);
+
   const startShare = useCallback(async () => {
     setError('');
     try {
@@ -99,15 +108,6 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveF
       }
     }
   }, [stopShare]);
-
-  const stopShare = useCallback(() => {
-    stopLive();
-    const s = streamRef.current;
-    if (s) s.getTracks().forEach(t => t.stop());
-    streamRef.current = null;
-    setStream(null);
-    if (videoRef.current) videoRef.current.srcObject = null;
-  }, [stopLive]);
 
   const handleClose = useCallback(() => {
     stopShare();
