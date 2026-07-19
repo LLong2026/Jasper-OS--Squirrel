@@ -1,0 +1,67 @@
+{
+  "name": "PredictiveAlert",
+  "type": "object",
+  "properties": {
+    "alert_type": {
+      "type": "string",
+      "description": "Type of predictive alert"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Alert severity"
+    },
+    "predicted_issue": {
+      "type": "string",
+      "description": "Description of the predicted issue"
+    },
+    "probability": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Probability of the issue materializing (0-1)"
+    },
+    "affected_components": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Components at risk"
+    },
+    "recommended_action": {
+      "type": "string",
+      "description": "Suggested remediation"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "acknowledged",
+        "acted_on"
+      ],
+      "default": "pending",
+      "description": "Alert lifecycle status"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "ISO timestamp when the alert was created"
+    },
+    "resolved_at": {
+      "type": "string",
+      "description": "ISO timestamp when the alert was resolved"
+    }
+  },
+  "required": [
+    "alert_type",
+    "severity",
+    "predicted_issue"
+  ]
+}

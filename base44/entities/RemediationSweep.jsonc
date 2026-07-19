@@ -7,7 +7,8 @@
       "enum": [
         "scheduled",
         "manual",
-        "triggered"
+        "triggered",
+        "cross_app_monitoring"
       ],
       "default": "scheduled",
       "description": "How the sweep was initiated"
