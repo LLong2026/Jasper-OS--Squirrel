@@ -17,6 +17,7 @@ Deno.serve(async (req) => {
         const { action, payload } = await req.json();
 
         if (action === 'score_action') {
+            if (!payload) return Response.json({ error: 'payload required' }, { status: 400 });
             const { token_id, action_type, context } = payload;
 
             // Load validators for this token

@@ -63,7 +63,7 @@ const CHECK_GROUPS = [
   { title: 'Orchestration', checks: [
     { id: 'swarm_orch', name: 'Swarm Orchestrator', run: async (b) => { const t=Date.now(); await b.functions.invoke('swarmOrchestrator',{action:'create_swarm'}); return {latency_ms:Date.now()-t, details:'Deployed'}; } },
     { id: 'agentic_id', name: 'Agentic Identity Layer', run: async (b) => { const t=Date.now(); await b.functions.invoke('agenticIdentityLayer',{action:'mint_did'}); return {latency_ms:Date.now()-t, details:'Deployed'}; } },
-    { id: 'token_engine', name: 'Token Policy Engine', run: async (b) => { const t=Date.now(); await b.functions.invoke('tokenPolicyEngine',{action:'score_action'}); return {latency_ms:Date.now()-t, details:'Deployed'}; } },
+    { id: 'token_engine', name: 'Token Policy Engine', run: async (b) => { const t=Date.now(); await b.functions.invoke('tokenPolicyEngine',{action:'score_action', payload:{token_id:'preflight_probe', action_type:'mint', context:{}}}); return {latency_ms:Date.now()-t, details:'Deployed'}; } },
   ]},
 ];
 
