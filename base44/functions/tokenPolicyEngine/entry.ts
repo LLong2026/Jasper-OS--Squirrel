@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 
 /**
  * Token Policy Engine
@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
             const { token_id } = payload;
 
             const state = await base44.asServiceRole.entities.GlobalMemory.filter({
-                tags: { $contains: token_id },
+                tags: token_id,
                 memory_type: 'token_state'
             }, '-created_date', 1);
 
@@ -192,13 +192,13 @@ Deno.serve(async (req) => {
 
 async function loadValidators(token_id, base44) {
     const compilations = await base44.asServiceRole.entities.GlobalMemory.filter({
-        tags: { $contains: token_id },
+        tags: token_id,
         memory_type: 'compilation'
     }, '-created_date', 1);
 
     if (compilations.length === 0) return null;
     
-    return compilations[0].content.manifest.validators || compilations[0].content.validators;
+    return compilations[0].content.validators || compilations[0].content.manifest?.validators;
 }
 
 async function scoreAction(action_type, context, validators, base44) {
@@ -273,7 +273,7 @@ async function executeTokenAction(token_id, action_type, params, validators, bas
 
     // Update token state
     const currentState = await base44.asServiceRole.entities.GlobalMemory.filter({
-        tags: { $contains: token_id },
+        tags: token_id,
         memory_type: 'token_state'
     }, '-created_date', 1);
 

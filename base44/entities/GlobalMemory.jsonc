@@ -9,7 +9,14 @@
         "experience",
         "pattern",
         "solution",
-        "failure"
+        "failure",
+        "compilation",
+        "token_state",
+        "audit_log",
+        "anchor",
+        "batch_anchor",
+        "proposal",
+        "decision"
       ],
       "description": "Type of memory stored"
     },

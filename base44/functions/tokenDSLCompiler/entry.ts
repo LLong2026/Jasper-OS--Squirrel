@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 
 /**
  * Token DSL Compiler
@@ -81,6 +81,9 @@ Deno.serve(async (req) => {
                 memory_type: 'compilation',
                 content: {
                     manifest,
+                    validators,
+                    contract_templates: contractTemplates,
+                    simulation_graph: simulationGraph,
                     anchor_cid: anchorResult.data.ipfs_cid,
                     merkle_root: anchorResult.data.merkle_root
                 },

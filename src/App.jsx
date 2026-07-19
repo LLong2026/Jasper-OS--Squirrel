@@ -13,6 +13,7 @@ import AuditHolonomyDashboard from './pages/AuditHolonomyDashboard';
 import BridgeVisualizer from './pages/BridgeVisualizer';
 import SwarmConsole from './pages/SwarmConsole';
 import QuantumReadinessPanel from './pages/QuantumReadinessPanel';
+import TokenStudio from './pages/TokenStudio';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -94,6 +95,11 @@ const AuthenticatedApp = () => {
       <Route path="/QuantumReadinessPanel" element={
         <LayoutWrapper currentPageName="QuantumReadinessPanel">
           <QuantumReadinessPanel />
+        </LayoutWrapper>
+      } />
+      <Route path="/TokenStudio" element={
+        <LayoutWrapper currentPageName="TokenStudio">
+          <TokenStudio />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />

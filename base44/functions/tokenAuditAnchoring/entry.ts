@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 
 /**
  * Token Audit & Anchoring
@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
             const { token_id, start_date, end_date, action_types } = payload;
 
             const query = {
-                tags: { $contains: token_id },
+                tags: token_id,
                 memory_type: 'audit_log'
             };
 
@@ -233,7 +233,7 @@ function generateRandomHash() {
 async function anchorActionBatch(token_id, base44) {
     // Get recent unanchored actions
     const recentActions = await base44.asServiceRole.entities.GlobalMemory.filter({
-        tags: { $contains: token_id },
+        tags: token_id,
         memory_type: 'audit_log'
     }, '-created_date', 50);
 
