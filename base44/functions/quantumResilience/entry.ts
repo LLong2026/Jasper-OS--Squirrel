@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import { ml_dsa65 } from 'npm:@noble/post-quantum@0.6.1/ml-dsa.js';
+import { ml_dsa65 } from 'https://esm.sh/@noble/post-quantum@0.6.1/ml-dsa.js';
 
 // Jasper OS Crypto Abstraction Layer — JIP-QRM-01 Phase 1 (HYBRID_V1)
 // Classical slot: ECDSA P-256 (real Web Crypto).
@@ -421,6 +421,39 @@ Deno.serve(async (req) => {
         note: hsm.configured
           ? 'Hardware-backed key custody active.'
           : 'Software-backed ML-DSA-65 active. Set HSM_PROVIDER + credentials for hardware custody before touching real money.',
+      });
+    }
+
+    // Sign + verify round-trip in one call (full signature stays server-side,
+    // avoids client-side truncation of the ~3.3KB ML-DSA-65 signature).
+    if (action === 'pq_real_self_test') {
+      const data = enc.encode(body.payload || 'jasper-ute-pq-self-test');
+      let pqKey = body.pair_id
+        ? (await svc.filter({ pair_id: body.pair_id, key_type: 'MLDSA65_REAL_SIGNING', status: 'active' }))[0]
+        : (await svc.filter({ surface: body.surface || 'urib', key_type: 'MLDSA65_REAL_SIGNING', status: 'active' }))[0];
+      if (!pqKey) {
+        const { pubB64, secB64 } = realMlDsaKeypair();
+        const pairId = keyId('pair');
+        const now = Date.now();
+        pqKey = await svc.create({
+          key_id: keyId('kr'), pair_id: pairId,
+          key_type: 'MLDSA65_REAL_SIGNING', key_profile: 'pq',
+          surface: body.surface || 'urib', agent_name: body.agent_name || 'self-test',
+          public_key: pubB64, private_material: secB64,
+          crypto_backend: 'software',
+          status: 'active', created_at: now,
+        });
+      }
+      const sig = realMlDsaSign(pqKey.private_material, data);
+      const valid = realMlDsaVerify(pqKey.public_key, sig, data);
+      return Response.json({
+        algorithm: 'ML-DSA-65 (FIPS 204)',
+        crypto_profile: 'PQ_NATIVE',
+        block_version: 3,
+        pair_id: pqKey.pair_id,
+        signature_bytes: Math.floor((sig.length * 3) / 4),
+        sign_verify_roundtrip_valid: valid,
+        library: '@noble/post-quantum (esm.sh)',
       });
     }
 
