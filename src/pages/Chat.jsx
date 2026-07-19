@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { createAgent } from '@/functions/createAgent';
-import { Send, Loader2, Sparkles, AlertCircle, Copy, Check, Cpu, Download, Mic, MicOff, Volume2, VolumeX, Radio, Box, Monitor, Paperclip } from 'lucide-react';
+import { Send, Loader2, Sparkles, AlertCircle, Copy, Check, Cpu, Download, Mic, MicOff, Volume2, VolumeX, Radio, Box, Monitor, Paperclip, Clapperboard } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,6 +18,7 @@ import ModelSelector, { MODELS } from '@/components/capabilities/ModelSelector';
 import AIControlsPanel from '@/components/chat/AIControlsPanel';
 import FileDropZone from '@/components/chat/FileDropZone';
 import ScreenSharePanel from '@/components/chat/ScreenSharePanel';
+import VideoGeneratorPanel from '@/components/chat/VideoGeneratorPanel';
 import { Settings2 } from 'lucide-react';
 
 const ProofBadge = ({ proof }) => {
@@ -208,6 +209,7 @@ export default function ChatPage() {
   const [directLLMMode, setDirectLLMMode] = useState(() => localStorage.getItem('jasper_direct_llm') === 'true');
   const [showAIControls, setShowAIControls] = useState(false);
   const [showScreenShare, setShowScreenShare] = useState(false);
+  const [showVideoGen, setShowVideoGen] = useState(false);
   const [memorySummary, setMemorySummary] = useState('');
   const memoryInjectedRef = useRef(false);
   const lastConsolidateRef = useRef(0);
@@ -977,6 +979,17 @@ export default function ChatPage() {
         onClose={() => setShowScreenShare(false)}
         onCaptureSent={async (url) => { await handleScreenCapture(url); }}
       />
+      <VideoGeneratorPanel
+        open={showVideoGen}
+        onClose={() => setShowVideoGen(false)}
+        onVideoGenerated={(promptText, firstUrl, allClips) => {
+          const clipList = allClips.map((c, i) => `Scene ${i + 1}: [${c.url}](${c.url})`).join('\n');
+          const content = allClips.length > 1
+            ? `🎬 Generated a ${allClips.length}-scene storyboard video:\n\n${clipList}`
+            : `🎬 Generated a video clip: [${firstUrl}](${firstUrl})`;
+          setMessages(prev => [...prev, { role: 'user', content: `Generate video: ${promptText}` }, { role: 'assistant', content }]);
+        }}
+      />
       <header className="p-4 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
@@ -1082,6 +1095,15 @@ export default function ChatPage() {
                 title="Share your screen with Jasper"
               >
                 <Monitor className="w-4 h-4" />
+              </Button>
+              <Button
+                size="icon"
+                className="bg-slate-700 hover:bg-slate-600 disabled:bg-slate-600"
+                onClick={() => setShowVideoGen(true)}
+                disabled={!conversation || isLoading}
+                title="Generate video"
+              >
+                <Clapperboard className="w-4 h-4" />
               </Button>
               <Button
                 size="icon"
