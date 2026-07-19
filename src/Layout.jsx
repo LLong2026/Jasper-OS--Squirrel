@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio, Workflow, Coins, Heart, Cpu } from 'lucide-react';
+import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio, Workflow, Coins, Heart, Cpu, Rocket, Info } from 'lucide-react';
 import CollapsibleSection from '@/components/ui/CollapsibleSection';
+import LegalFooter from '@/components/legal/LegalFooter';
 
 export default function Layout({ children, currentPageName }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +52,8 @@ export default function Layout({ children, currentPageName }) {
         {
             title: 'Platform', icon: Layers, accent: 'text-violet-400', defaultOpen: false,
             items: [
+                { name: 'GoLive', href: createPageUrl('GoLive'), icon: Rocket },
+                { name: 'About', href: createPageUrl('About'), icon: Info },
                 { name: 'GitHubExport', href: createPageUrl('GitHubExport'), icon: GitBranch },
                 { name: 'CinematicDashboard', href: createPageUrl('CinematicDashboard'), icon: Sparkles },
                 { name: 'AuroraArchitecture', href: createPageUrl('AuroraArchitecture'), icon: Zap },
@@ -126,6 +129,7 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="flex-1 flex flex-col overflow-y-auto">
                 {children}
+                <LegalFooter />
             </div>
         </div>
     );

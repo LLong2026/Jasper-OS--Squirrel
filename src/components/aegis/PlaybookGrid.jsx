@@ -2,9 +2,9 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PLAYBOOKS, PLAYBOOK_STATS } from '@/lib/aegisPlaybooks';
-import { RotateCw, TrendingUp, Shuffle, Undo2, Flame, CloudOff, Trash2, DatabaseBackup, ShieldAlert, BellRing, Database, SlidersHorizontal, Network, Bird, Gauge, Atom, KeyRound, Shield } from 'lucide-react';
+import { RotateCw, TrendingUp, Shuffle, Undo2, Flame, CloudOff, Trash2, DatabaseBackup, ShieldAlert, BellRing, Database, SlidersHorizontal, Network, Bird, Gauge, Atom, KeyRound, Shield, Lock, Coins, Radio, ToggleRight, Bug, Plug, Layers } from 'lucide-react';
 
-const ICONS = { RotateCw, TrendingUp, Shuffle, Undo2, Flame, CloudOff, Trash2, DatabaseBackup, ShieldAlert, BellRing, Database, SlidersHorizontal, Network, Bird, Gauge, Atom, KeyRound };
+const ICONS = { RotateCw, TrendingUp, Shuffle, Undo2, Flame, CloudOff, Trash2, DatabaseBackup, ShieldAlert, BellRing, Database, SlidersHorizontal, Network, Bird, Gauge, Atom, KeyRound, Lock, Coins, Radio, ToggleRight, Bug, Plug, Layers };
 
 const catColor = {
   core: 'border-blue-500/30 bg-blue-500/5',

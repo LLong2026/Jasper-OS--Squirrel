@@ -16,6 +16,8 @@ import QuantumReadinessPanel from './pages/QuantumReadinessPanel';
 import TokenStudio from './pages/TokenStudio';
 import AegisSelfHealing from './pages/AegisSelfHealing';
 import AreteEngine from './pages/AreteEngine';
+import GoLive from './pages/GoLive';
+import About from './pages/About';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -112,6 +114,16 @@ const AuthenticatedApp = () => {
       <Route path="/AreteEngine" element={
         <LayoutWrapper currentPageName="AreteEngine">
           <AreteEngine />
+        </LayoutWrapper>
+      } />
+      <Route path="/GoLive" element={
+        <LayoutWrapper currentPageName="GoLive">
+          <GoLive />
+        </LayoutWrapper>
+      } />
+      <Route path="/About" element={
+        <LayoutWrapper currentPageName="About">
+          <About />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
