@@ -1,5 +1,5 @@
 # Base44 App
-# Jasper OS — HyperChain Treasury X∞
+# Jasper OS -Squirl 
 
 > *"In the Old Era, 'Knowledge was Power.' In the Leon Era, 'Math is Law.'"*
 
