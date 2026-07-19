@@ -35,6 +35,8 @@ PB-005 Cache Warming, PB-006 CDN Flush, PB-007 Disk Cleanup, PB-008 Snapshot Res
 PB-009 Security Incident (manual), PB-010 Escalation,
 PB-011 Database Reindex, PB-012 Config Drift Correction, PB-013 Service Dependency Restart,
 PB-014 Canary Rollback, PB-015 Rate Limiter Adjustment,
+PB-016 Entity Recovery (entity_error, schema/validation failure),
+PB-017 Integration Failover (integration_degraded, LLM provider slow/failing),
 PQM-001 Post-Quantum Crypto Upgrade, PQR-001 Post-Quantum Key Rotation.
 
 Respond as JSON with: root_cause (string), confidence (0-1 number), impact (string), urgency (low|medium|high|critical), playbook_id (the best PB/PQM/PQR id), reasoning (string), proactive_recommendation (string).`;

@@ -19,6 +19,8 @@ export const PLAYBOOKS = [
   { id: 'PB-015', name: 'Rate Limiter Adjustment', category: 'advanced', icon: 'Gauge', trigger: 'traffic spike > 3x, DDoS pattern', actions: ['analyze_traffic', 'calculate_limits', 'apply_throttling'], safety: 'never block > 256 IPs', fallback: 'PB-006' },
   { id: 'PQM-001', name: 'Post-Quantum Crypto Upgrade', category: 'quantum', icon: 'Atom', trigger: 'quantum-vulnerable algorithm detected', actions: ['analyze_crypto', 'initiate_crypto_upgrade', 'deploy_post_quantum_patch', 'rotate_keys_pq', 'decommission_classical', 'verify'], safety: 'dual-sign during migration', fallback: 'PQR-001' },
   { id: 'PQR-001', name: 'Post-Quantum Key Rotation', category: 'quantum', icon: 'KeyRound', trigger: 'PQ migration needed, key expiry', actions: ['analyze_crypto', 'rotate_keys_pq', 'decommission_classical', 'verify'], safety: 'verify round-trip before activation, decommission classical keys', fallback: 'PB-010' },
+  { id: 'PB-016', name: 'Entity Recovery', category: 'advanced', icon: 'Database', trigger: 'entity_error — schema validation failure, query timeout', actions: ['probe_entities', 'identify_failing_entity', 'repair_entity', 'verify'], safety: 'read-only probe first, targeted repair only', fallback: 'PB-010' },
+  { id: 'PB-017', name: 'Integration Failover', category: 'advanced', icon: 'Network', trigger: 'integration_degraded — LLM provider or connector slow/failing', actions: ['probe_integrations', 'select_healthy_provider', 'reroute_integration', 'verify'], safety: 'prefer free-tier providers, preserve conversation context', fallback: 'PB-010' },
 ];
 
 export const PLAYBOOK_STATS = {
