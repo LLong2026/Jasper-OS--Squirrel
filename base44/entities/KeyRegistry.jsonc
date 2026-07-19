@@ -1,0 +1,83 @@
+{
+  "name": "KeyRegistry",
+  "type": "object",
+  "properties": {
+    "key_id": {
+      "type": "string",
+      "description": "Unique key identifier"
+    },
+    "pair_id": {
+      "type": "string",
+      "description": "Links the classical + PQ halves of a hybrid keypair"
+    },
+    "key_type": {
+      "type": "string",
+      "enum": [
+        "ECDSA_P256_SIGNING",
+        "MLDSA65_SIGNING",
+        "MLKEM768_KEM"
+      ],
+      "description": "Cryptographic key type (classical or PQ)"
+    },
+    "key_profile": {
+      "type": "string",
+      "enum": [
+        "classical",
+        "pq",
+        "hybrid"
+      ],
+      "description": "Crypto profile this key belongs to"
+    },
+    "surface": {
+      "type": "string",
+      "enum": [
+        "threadzero",
+        "did",
+        "urib",
+        "agent_delegation"
+      ],
+      "description": "Long-lived surface this key protects"
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Agent this key is bound to (if applicable)"
+    },
+    "public_key": {
+      "type": "string",
+      "description": "Base64 public key material (SPKI for ECDSA; derived id for PQ simulation)"
+    },
+    "private_material": {
+      "type": "string",
+      "description": "Base64 private key material (simulation only \u2014 HSM-backed in production)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated",
+        "revoked"
+      ],
+      "default": "active",
+      "description": "Key lifecycle status"
+    },
+    "rotated_from": {
+      "type": "string",
+      "description": "pair_id this key rotated from"
+    },
+    "rotated_to": {
+      "type": "string",
+      "description": "pair_id this key was rotated to"
+    },
+    "created_at": {
+      "type": "number",
+      "description": "Creation timestamp (ms)"
+    }
+  },
+  "required": [
+    "key_id",
+    "pair_id",
+    "key_type",
+    "key_profile",
+    "surface"
+  ]
+}

@@ -53,6 +53,7 @@ export default function Layout({ children, currentPageName }) {
                 { name: 'AuditHolonomy', href: createPageUrl('AuditHolonomyDashboard'), icon: Orbit },
                 { name: 'BridgeVisualizer', href: createPageUrl('BridgeVisualizer'), icon: Radio },
                 { name: 'SwarmConsole', href: createPageUrl('SwarmConsole'), icon: Workflow },
+                { name: 'QuantumReadiness', href: createPageUrl('QuantumReadinessPanel'), icon: Shield },
             ]
         },
     ];
