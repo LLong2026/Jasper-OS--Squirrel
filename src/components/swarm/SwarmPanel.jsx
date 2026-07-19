@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Workflow, Plus, Loader2, Play, CheckCircle2, Zap, ListChecks, GitMerge } from 'lucide-react';
+import { Plus, Loader2, Play, CheckCircle2, Zap, ListChecks, GitMerge } from 'lucide-react';
 
 const STEPS = [
-  { key: 'decompose_goal', label: 'Decompose', icon: ListChecks, action: 'decompose_goal' },
-  { key: 'dispatch_tasks', label: 'Dispatch', icon: Play, action: 'dispatch_tasks' },
-  { key: 'collect_results', label: 'Collect', icon: Zap, action: 'collect_results' },
-  { key: 'reach_consensus', label: 'Consensus', icon: GitMerge, action: 'reach_consensus' }
+  { label: 'Decompose', icon: ListChecks, action: 'decompose_goal' },
+  { label: 'Dispatch', icon: Play, action: 'dispatch_tasks' },
+  { label: 'Collect', icon: Zap, action: 'collect_results' },
+  { label: 'Consensus', icon: GitMerge, action: 'reach_consensus' }
 ];
 
-export default function SwarmPanel({ identities, onSwarmCreated }) {
+export default function SwarmPanel({ identities, onSwarmCreated, onSwarmChange, embedded = false }) {
   const [name, setName] = useState('');
   const [goal, setGoal] = useState('');
   const [selected, setSelected] = useState([]);
@@ -22,6 +22,10 @@ export default function SwarmPanel({ identities, onSwarmCreated }) {
   const [swarm, setSwarm] = useState(null);
   const [tasks, setTasks] = useState([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (onSwarmChange) onSwarmChange(swarm, tasks);
+  }, [swarm, tasks, onSwarmChange]);
 
   const toggle = (did) => {
     setSelected((s) => (s.includes(did) ? s.filter((d) => d !== did) : [...s, did]));
@@ -60,7 +64,7 @@ export default function SwarmPanel({ identities, onSwarmCreated }) {
       const res = await base44.functions.invoke('swarmOrchestrator', { action, swarm_id: swarm.swarm_id });
       if (action === 'reach_consensus') {
         setSwarm(res.data.swarm);
-        toast({ title: res.data.reached ? 'Consensus reached' : 'No consensus', description: res.data.result_summary });
+        toast({ title: res.data.reached ? 'Consensus reached' : 'No consensus', description: res.data.swarm.result_summary });
       }
       const tRes = await base44.functions.invoke('swarmOrchestrator', { action: 'list_tasks', swarm_id: swarm.swarm_id });
       setTasks(tRes.data.tasks);
@@ -75,96 +79,65 @@ export default function SwarmPanel({ identities, onSwarmCreated }) {
     }
   };
 
-  return (
-    <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Workflow className="h-5 w-5 text-violet-400" />
-        <h2 className="text-lg font-semibold text-slate-100">Swarm Orchestration</h2>
-      </div>
+  const wrapperClass = embedded ? '' : 'bg-slate-900/60 border border-slate-800 rounded-xl p-4';
 
+  return (
+    <div className={wrapperClass}>
       {!swarm ? (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div>
             <Label className="text-slate-400 text-xs">Swarm Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="V2 Foundation Swarm" className="bg-slate-950/60 border-slate-700 text-slate-100" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="V2 Foundation Swarm" className="bg-slate-950/60 border-slate-700 text-slate-100 h-8" />
           </div>
           <div>
             <Label className="text-slate-400 text-xs">Goal</Label>
-            <Textarea value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Design the foundational architecture for Jasper V2..." className="bg-slate-950/60 border-slate-700 text-slate-100 min-h-[70px]" />
+            <Textarea value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Design the foundational architecture for Jasper V2..." className="bg-slate-950/60 border-slate-700 text-slate-100 min-h-[60px] text-sm" />
           </div>
           <div>
-            <Label className="text-slate-400 text-xs">Select Members ({selected.length})</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-              {identities.length === 0 && <p className="text-slate-500 text-sm">Mint identities first.</p>}
+            <Label className="text-slate-400 text-xs">Members ({selected.length})</Label>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {identities.length === 0 && <p className="text-slate-500 text-xs">Mint identities first.</p>}
               {identities.map((id) => (
                 <button
                   key={id.id}
                   onClick={() => toggle(id.did)}
-                  className={`text-left px-3 py-2 rounded-lg border text-sm transition-colors ${selected.includes(id.did) ? 'border-violet-500 bg-violet-500/15 text-violet-200' : 'border-slate-700 bg-slate-950/50 text-slate-300 hover:border-slate-600'}`}
+                  className={`w-full text-left px-2 py-1.5 rounded-md border text-xs transition-colors ${selected.includes(id.did) ? 'border-violet-500 bg-violet-500/15 text-violet-200' : 'border-slate-700 bg-slate-950/50 text-slate-300 hover:border-slate-600'}`}
                 >
                   <p className="font-medium truncate">{id.display_name || id.agent_name}</p>
-                  <p className="text-xs font-mono text-slate-500 truncate">{id.did}</p>
+                  <p className="text-[10px] font-mono text-slate-500 truncate">{id.did}</p>
                 </button>
               ))}
             </div>
           </div>
-          <Button onClick={create} disabled={busy} className="w-full bg-violet-600 hover:bg-violet-500">
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+          <Button onClick={create} disabled={busy} className="w-full bg-violet-600 hover:bg-violet-500 h-8">
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
             Form Swarm
           </Button>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="bg-slate-950/50 border border-slate-800 rounded-lg p-3">
+        <div className="space-y-3">
+          <div className="bg-slate-950/50 border border-slate-800 rounded-lg p-2.5">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-100 font-medium">{swarm.name}</p>
-                <p className="text-xs text-slate-500 font-mono">{swarm.swarm_id}</p>
-              </div>
-              <span className={`text-xs px-2 py-1 rounded-full ${swarm.status === 'completed' ? 'bg-emerald-500/15 text-emerald-400' : swarm.status === 'failed' ? 'bg-rose-500/15 text-rose-400' : 'bg-violet-500/15 text-violet-400'}`}>
-                {swarm.status}
-              </span>
+              <p className="text-slate-100 text-sm font-medium truncate">{swarm.name}</p>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${swarm.status === 'completed' ? 'bg-emerald-500/15 text-emerald-400' : swarm.status === 'failed' ? 'bg-rose-500/15 text-rose-400' : 'bg-violet-500/15 text-violet-400'}`}>{swarm.status}</span>
             </div>
-            <p className="text-sm text-slate-400 mt-2">{swarm.goal}</p>
             {swarm.result_summary && (
-              <p className="text-xs text-emerald-400 mt-2 flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" /> {swarm.result_summary}
+              <p className="text-[10px] text-emerald-400 mt-1.5 flex items-center gap-1">
+                <CheckCircle2 className="h-2.5 w-2.5" /> {swarm.result_summary}
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             {STEPS.map((s) => (
-              <Button key={s.key} variant="outline" onClick={() => runStep(s.action)} disabled={busy} className="border-slate-700 text-slate-300">
-                <s.icon className="h-4 w-4" /> {s.label}
+              <Button key={s.action} variant="outline" onClick={() => runStep(s.action)} disabled={busy} className="border-slate-700 text-slate-300 h-7 text-xs">
+                <s.icon className="h-3 w-3" /> {s.label}
               </Button>
             ))}
           </div>
 
-          <div className="space-y-2 max-h-72 overflow-y-auto">
-            {tasks.length === 0 && <p className="text-slate-500 text-sm text-center py-4">Run "Decompose" to generate tasks.</p>}
-            {tasks.map((t) => (
-              <div key={t.id} className="bg-slate-950/50 border border-slate-800 rounded-lg p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-slate-100 font-medium truncate">
-                      <span className="text-slate-600 mr-1">#{t.order + 1}</span> {t.title}
-                    </p>
-                    <p className="text-xs text-slate-500 truncate">{t.description}</p>
-                  </div>
-                  <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${t.status === 'completed' ? 'bg-emerald-500/15 text-emerald-400' : t.status === 'failed' ? 'bg-rose-500/15 text-rose-400' : 'bg-slate-700 text-slate-300'}`}>
-                    {t.status}
-                  </span>
-                </div>
-                {t.result && (
-                  <p className="text-xs text-cyan-400 mt-2">{t.result.output}</p>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <Button variant="ghost" onClick={() => { setSwarm(null); setTasks([]); }} className="text-slate-400 w-full">
-            Start a new swarm
+          <Button variant="ghost" onClick={() => { setSwarm(null); setTasks([]); }} className="text-slate-400 w-full h-7 text-xs">
+            New swarm
           </Button>
         </div>
       )}

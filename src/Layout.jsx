@@ -2,33 +2,59 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Bot, Handshake, Beaker, Brain, Network, Dna, GitBranch, Plug, Sparkles, Shield, Menu, X, Zap, Layers, Atom, Gauge, Orbit, Radio, Workflow } from 'lucide-react';
+import CollapsibleSection from '@/components/ui/CollapsibleSection';
 
 export default function Layout({ children, currentPageName }) {
     const [isOpen, setIsOpen] = useState(false);
 
-    const navItems = [
-        { name: 'Chat', href: createPageUrl('Chat'), icon: Bot },
-        { name: 'AgentCreator', href: createPageUrl('AgentCreator'), icon: Sparkles },
-        { name: 'IntegrationHub', href: createPageUrl('IntegrationHub'), icon: Plug },
-        { name: 'HiveMindDashboard', href: createPageUrl('HiveMindDashboard'), icon: Brain },
-        { name: 'EvolutionDashboard', href: createPageUrl('EvolutionDashboard'), icon: GitBranch },
-        { name: 'AreteMonitor', href: createPageUrl('AreteMonitor'), icon: Dna },
-        { name: 'AINodeDashboard', href: createPageUrl('AINodeDashboard'), icon: Network },
-        { name: 'Partnerships', href: createPageUrl('Partnerships'), icon: Handshake },
-        { name: 'ResearchWorkbench', href: createPageUrl('ResearchWorkbench'), icon: Beaker },
-        { name: 'StabilityDashboard', href: createPageUrl('StabilityDashboard'), icon: Shield },
-        { name: 'GovernanceDashboard', href: createPageUrl('GovernanceDashboard'), icon: Shield },
-        { name: 'TexasSovereignLedger', href: createPageUrl('TexasSovereignLedger'), icon: Shield },
-        { name: 'StableCoinMint', href: createPageUrl('StableCoinMint'), icon: Sparkles },
-        { name: 'GitHubExport', href: createPageUrl('GitHubExport'), icon: GitBranch },
-        { name: 'CinematicDashboard', href: createPageUrl('CinematicDashboard'), icon: Sparkles },
-        { name: 'AuroraArchitecture', href: createPageUrl('AuroraArchitecture'), icon: Zap },
-        { name: 'AuroraImplementation', href: createPageUrl('AuroraImplementation'), icon: Layers },
-        { name: 'OmegaManifold', href: createPageUrl('OmegaManifold'), icon: Atom },
-        { name: 'CapabilitiesDashboard', href: createPageUrl('CapabilitiesDashboard'), icon: Gauge },
-        { name: 'AuditHolonomy', href: createPageUrl('AuditHolonomyDashboard'), icon: Orbit },
-        { name: 'BridgeVisualizer', href: createPageUrl('BridgeVisualizer'), icon: Radio },
-        { name: 'SwarmConsole', href: createPageUrl('SwarmConsole'), icon: Workflow },
+    const navGroups = [
+        {
+            title: 'Core', icon: Bot, accent: 'text-blue-400', defaultOpen: true,
+            items: [
+                { name: 'Chat', href: createPageUrl('Chat'), icon: Bot },
+                { name: 'AgentCreator', href: createPageUrl('AgentCreator'), icon: Sparkles },
+                { name: 'IntegrationHub', href: createPageUrl('IntegrationHub'), icon: Plug },
+            ]
+        },
+        {
+            title: 'Intelligence', icon: Brain, accent: 'text-emerald-400', defaultOpen: true,
+            items: [
+                { name: 'HiveMindDashboard', href: createPageUrl('HiveMindDashboard'), icon: Brain },
+                { name: 'EvolutionDashboard', href: createPageUrl('EvolutionDashboard'), icon: GitBranch },
+                { name: 'AreteMonitor', href: createPageUrl('AreteMonitor'), icon: Dna },
+                { name: 'AINodeDashboard', href: createPageUrl('AINodeDashboard'), icon: Network },
+            ]
+        },
+        {
+            title: 'Network', icon: Handshake, accent: 'text-amber-400', defaultOpen: false,
+            items: [
+                { name: 'Partnerships', href: createPageUrl('Partnerships'), icon: Handshake },
+                { name: 'ResearchWorkbench', href: createPageUrl('ResearchWorkbench'), icon: Beaker },
+            ]
+        },
+        {
+            title: 'Sovereign Ledger', icon: Shield, accent: 'text-rose-400', defaultOpen: false,
+            items: [
+                { name: 'StabilityDashboard', href: createPageUrl('StabilityDashboard'), icon: Shield },
+                { name: 'GovernanceDashboard', href: createPageUrl('GovernanceDashboard'), icon: Shield },
+                { name: 'TexasSovereignLedger', href: createPageUrl('TexasSovereignLedger'), icon: Shield },
+                { name: 'StableCoinMint', href: createPageUrl('StableCoinMint'), icon: Sparkles },
+            ]
+        },
+        {
+            title: 'Platform', icon: Layers, accent: 'text-violet-400', defaultOpen: false,
+            items: [
+                { name: 'GitHubExport', href: createPageUrl('GitHubExport'), icon: GitBranch },
+                { name: 'CinematicDashboard', href: createPageUrl('CinematicDashboard'), icon: Sparkles },
+                { name: 'AuroraArchitecture', href: createPageUrl('AuroraArchitecture'), icon: Zap },
+                { name: 'AuroraImplementation', href: createPageUrl('AuroraImplementation'), icon: Layers },
+                { name: 'OmegaManifold', href: createPageUrl('OmegaManifold'), icon: Atom },
+                { name: 'CapabilitiesDashboard', href: createPageUrl('CapabilitiesDashboard'), icon: Gauge },
+                { name: 'AuditHolonomy', href: createPageUrl('AuditHolonomyDashboard'), icon: Orbit },
+                { name: 'BridgeVisualizer', href: createPageUrl('BridgeVisualizer'), icon: Radio },
+                { name: 'SwarmConsole', href: createPageUrl('SwarmConsole'), icon: Workflow },
+            ]
+        },
     ];
 
     return (
@@ -61,20 +87,30 @@ export default function Layout({ children, currentPageName }) {
                         className="fixed inset-0 bg-black/50 z-40"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="fixed left-16 top-0 h-full w-64 bg-slate-900 border-r border-slate-800 z-50 py-4 px-2 overflow-y-auto">
-                        <div className="space-y-1">
-                            {navItems.map(item => (
-                                <Link
-                                    key={item.name}
-                                    to={item.href}
-                                    onClick={() => setIsOpen(false)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-500/20 hover:text-blue-400 transition-colors ${currentPageName === item.name ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300'}`}
-                                >
-                                    <item.icon className="h-5 w-5" />
-                                    <span className="font-medium">{item.name}</span>
-                                </Link>
-                            ))}
-                        </div>
+                    <div className="fixed left-16 top-0 h-full w-64 bg-slate-900 border-r border-slate-800 z-50 py-2 px-1 overflow-y-auto">
+                        {navGroups.map(group => (
+                            <CollapsibleSection
+                                key={group.title}
+                                title={group.title}
+                                icon={group.icon}
+                                accent={group.accent}
+                                defaultOpen={group.defaultOpen}
+                            >
+                                <div className="space-y-0.5">
+                                    {group.items.map(item => (
+                                        <Link
+                                            key={item.name}
+                                            to={item.href}
+                                            onClick={() => setIsOpen(false)}
+                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-500/20 hover:text-blue-400 transition-colors text-sm ${currentPageName === item.name ? 'bg-blue-500/20 text-blue-400' : 'text-slate-300'}`}
+                                        >
+                                            <item.icon className="h-4 w-4 shrink-0" />
+                                            <span className="font-medium truncate">{item.name}</span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </CollapsibleSection>
+                        ))}
                     </div>
                 </>
             )}

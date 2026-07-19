@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Fingerprint, Plus, ShieldCheck, RefreshCw, Loader2, KeyRound, Award } from 'lucide-react';
+import { Plus, ShieldCheck, RefreshCw, Loader2, KeyRound, Award } from 'lucide-react';
 
-export default function IdentityPanel({ identities, onRefresh }) {
+export default function IdentityPanel({ identities, onRefresh, embedded = false }) {
   const [agentName, setAgentName] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -42,7 +42,7 @@ export default function IdentityPanel({ identities, onRefresh }) {
       await base44.functions.invoke('agenticIdentityLayer', {
         action: 'issue_credential',
         did,
-        credential: { type: 'swarm_operator', scope: 'orchestration' }
+        credential: { type: 'swarm operator', scope: 'orchestration' }
       });
       toast({ title: 'Credential issued', description: did });
       onRefresh();
@@ -53,64 +53,58 @@ export default function IdentityPanel({ identities, onRefresh }) {
     }
   };
 
+  const wrapperClass = embedded
+    ? ''
+    : 'bg-slate-900/60 border border-slate-800 rounded-xl p-4';
+
   return (
-    <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Fingerprint className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-lg font-semibold text-slate-100">Agentic Identity Layer</h2>
+    <div className={wrapperClass}>
+      {!embedded && (
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-slate-100">Identities</h2>
+          <Button variant="ghost" size="icon" onClick={onRefresh} disabled={busy}>
+            <RefreshCw className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={onRefresh} disabled={busy}>
-          <RefreshCw className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} />
+      )}
+
+      <div className="grid grid-cols-1 gap-2 mb-3">
+        <div>
+          <Label className="text-slate-400 text-xs">Agent Name</Label>
+          <Input value={agentName} onChange={(e) => setAgentName(e.target.value)} placeholder="SwarmAlpha" className="bg-slate-950/60 border-slate-700 text-slate-100 h-8" />
+        </div>
+        <div>
+          <Label className="text-slate-400 text-xs">Display Name</Label>
+          <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Alpha Coordinator" className="bg-slate-950/60 border-slate-700 text-slate-100 h-8" />
+        </div>
+        <Button onClick={mint} disabled={busy} className="bg-cyan-600 hover:bg-cyan-500 h-8">
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+          Mint DID
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-        <div className="md:col-span-1">
-          <Label className="text-slate-400 text-xs">Agent Name</Label>
-          <Input value={agentName} onChange={(e) => setAgentName(e.target.value)} placeholder="e.g. SwarmAlpha" className="bg-slate-950/60 border-slate-700 text-slate-100" />
-        </div>
-        <div className="md:col-span-1">
-          <Label className="text-slate-400 text-xs">Display Name</Label>
-          <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Alpha Coordinator" className="bg-slate-950/60 border-slate-700 text-slate-100" />
-        </div>
-        <div className="md:col-span-1 flex items-end">
-          <Button onClick={mint} disabled={busy} className="w-full bg-cyan-600 hover:bg-cyan-500">
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Mint DID
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2 max-h-72 overflow-y-auto">
+      <div className="space-y-2 max-h-64 overflow-y-auto">
         {identities.length === 0 && (
-          <p className="text-slate-500 text-sm text-center py-6">No identities yet. Mint one above.</p>
+          <p className="text-slate-500 text-xs text-center py-4">No identities yet.</p>
         )}
         {identities.map((id) => (
-          <div key={id.id} className="bg-slate-950/50 border border-slate-800 rounded-lg p-3">
+          <div key={id.id} className="bg-slate-950/50 border border-slate-800 rounded-lg p-2.5">
             <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-slate-100 font-medium truncate">{id.display_name || id.agent_name}</p>
-                <p className="text-xs text-slate-500 font-mono truncate">{id.did}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className={`text-xs px-2 py-1 rounded-full ${id.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>
-                  {id.status}
-                </span>
-                <span className="text-xs text-amber-400 flex items-center gap-1">
-                  <ShieldCheck className="h-3 w-3" /> {id.trust_score ?? 50}
+              <p className="text-slate-100 text-sm font-medium truncate">{id.display_name || id.agent_name}</p>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${id.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>{id.status}</span>
+                <span className="text-[10px] text-amber-400 flex items-center gap-0.5">
+                  <ShieldCheck className="h-3 w-3" />{id.trust_score ?? 50}
                 </span>
               </div>
             </div>
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <KeyRound className="h-3 w-3" />
-                <span className="font-mono truncate max-w-[12rem]">{id.public_key}</span>
-                <span className="text-slate-600">·</span>
-                <span className="font-mono">{id.truth_chain_anchor}</span>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => issueCredential(id.did)} disabled={busy} className="border-slate-700 text-slate-300">
-                <Award className="h-3 w-3" /> Credential
+            <p className="text-[10px] text-slate-500 font-mono truncate mt-1">{id.did}</p>
+            <div className="flex items-center justify-between mt-1.5">
+              <span className="text-[10px] text-slate-600 font-mono truncate flex items-center gap-1">
+                <KeyRound className="h-2.5 w-2.5" />{id.public_key}
+              </span>
+              <Button variant="outline" size="sm" onClick={() => issueCredential(id.did)} disabled={busy} className="border-slate-700 text-slate-300 h-6 px-2 text-[10px]">
+                <Award className="h-2.5 w-2.5" />Cred
               </Button>
             </div>
           </div>
