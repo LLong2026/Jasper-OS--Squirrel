@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Lightbulb, Cog, ListChecks, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
-import LegalFooter from '@/components/legal/LegalFooter';
 
 const SECTIONS = [
   {
@@ -100,15 +99,14 @@ function Section({ section }) {
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <div className="p-4 lg:p-6 space-y-4 flex-1 max-w-4xl mx-auto w-full">
+    <div className="bg-slate-950 text-slate-100 flex flex-col min-h-full">
+      <div className="p-4 lg:p-6 space-y-4 max-w-4xl mx-auto w-full">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">About Jasper</h1>
           <p className="text-xs text-slate-400 mt-1">The deterministic multi-agent orchestration engine for cross-rail financial lifecycle management</p>
         </div>
         {SECTIONS.map(s => <Section key={s.id} section={s} />)}
       </div>
-      <LegalFooter />
     </div>
   );
 }
