@@ -1,0 +1,38 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "settlement_alert_export",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "export_on_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "stabilitySheetsExport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Export to Google Sheets on new settlement alert",
+            "description": "Pushes new settlement anomalies + any pending Aegis logs"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Settlement Alert Export",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "SettlementAlert",
+      "events": [
+        "create"
+      ]
+    }
+  },
+  "description": "Triggers a Google Sheets stability export whenever a new settlement anomaly is detected"
+}

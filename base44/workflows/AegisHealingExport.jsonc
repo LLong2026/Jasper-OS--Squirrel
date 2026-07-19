@@ -1,0 +1,38 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "healing_event_export",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "export_on_heal": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "stabilitySheetsExport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Export to Google Sheets on new repair log",
+            "description": "Pushes new healing event + any pending stability logs"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Aegis Healing Export",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "AegisHealingEvent",
+      "events": [
+        "create"
+      ]
+    }
+  },
+  "description": "Triggers a Google Sheets stability export whenever a new Aegis healing/repair event is logged"
+}

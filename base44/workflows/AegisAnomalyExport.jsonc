@@ -1,0 +1,38 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "aegis_anomaly_export",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "export_on_anomaly": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "stabilitySheetsExport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Export to Google Sheets on new Aegis anomaly",
+            "description": "Pushes new infrastructure anomaly + any pending stability logs"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Aegis Anomaly Export",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "AegisAnomaly",
+      "events": [
+        "create"
+      ]
+    }
+  },
+  "description": "Triggers a Google Sheets stability export whenever a new Aegis infrastructure anomaly is detected"
+}
