@@ -8,6 +8,7 @@ import { fetchLiveFeed } from '@/functions/fetchLiveFeed';
 import { processPrivateData } from '@/functions/processPrivateData';
 import { InvokeLLM, UploadFile, ExtractDataFromUploadedFile } from '@/integrations/Core';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import OptimizationTrendsChart from '@/components/research/OptimizationTrendsChart';
 import ReactMarkdown from 'react-markdown';
 
 export default function ResearchWorkbench() {
@@ -250,6 +251,10 @@ export default function ResearchWorkbench() {
         <h1 className="text-4xl font-bold text-blue-400">Personalized Research & Innovation Engine</h1>
         <p className="text-slate-400 mt-2">Fuse global knowledge with your personal insights. Directed by Wednesday.</p>
       </header>
+
+      <div className="max-w-7xl mx-auto mb-8">
+        <OptimizationTrendsChart />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
         {/* Input Column */}
