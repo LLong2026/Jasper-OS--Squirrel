@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { createAgent } from '@/functions/createAgent';
-import { Send, Loader2, Sparkles, AlertCircle, Copy, Check, Cpu, Download, Mic, MicOff, Volume2, VolumeX, Radio, Box, Monitor, Paperclip, Clapperboard } from 'lucide-react';
+import { Send, Loader2, Sparkles, AlertCircle, Copy, Check, Cpu, Download, Mic, MicOff, Volume2, VolumeX, Radio, Box, Monitor, Paperclip, Clapperboard, Eye } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -210,6 +210,8 @@ export default function ChatPage() {
   const [showAIControls, setShowAIControls] = useState(false);
   const [showScreenShare, setShowScreenShare] = useState(false);
   const [showVideoGen, setShowVideoGen] = useState(false);
+  const [liveVisionActive, setLiveVisionActive] = useState(false);
+  const liveVisionUrlRef = useRef(null);
   const [memorySummary, setMemorySummary] = useState('');
   const memoryInjectedRef = useRef(false);
   const lastConsolidateRef = useRef(0);
@@ -839,7 +841,10 @@ export default function ChatPage() {
 
     setIsLoading(true);
     setError(null);
-    const userMessage = { role: 'user', content: input };
+    // Attach the current live-vision frame (if active) so Jasper can see the screen in real time
+    const liveFrame = liveVisionActive ? liveVisionUrlRef.current : null;
+    const visionNote = liveFrame ? '\n\n[Jasper can currently see my screen via Live Vision — reference what you observe.]' : '';
+    const userMessage = { role: 'user', content: input + visionNote, ...(liveFrame ? { file_urls: [liveFrame] } : {}) };
     setInput('');
     setMessages(prevMessages => [...prevMessages, userMessage]);
 
@@ -867,11 +872,13 @@ export default function ChatPage() {
           reply = fr?.response || fr?.data || (typeof fr === 'string' ? fr : JSON.stringify(fr));
           proofReasoning = `Free-tier provider — ${m.name}`;
         } else {
-          const res = await base44.integrations.Core.InvokeLLM({
+          const llmOpts = {
             prompt: personaPrompt,
             model: m.model,
             response_json_schema: { type: 'object', properties: { reply: { type: 'string' } } },
-          });
+          };
+          if (liveFrame) llmOpts.file_urls = [liveFrame];
+          const res = await base44.integrations.Core.InvokeLLM(llmOpts);
           reply = res?.reply || (typeof res === 'string' ? res : JSON.stringify(res));
         }
         const assistantMessage = {
@@ -906,7 +913,7 @@ export default function ChatPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, conversation, isLoading, directLLMMode, preferredModel, memorySummary, messages, consolidateMemory, setMessages, setIsLoading, setError]);
+  }, [input, conversation, isLoading, directLLMMode, preferredModel, memorySummary, messages, consolidateMemory, liveVisionActive, setMessages, setIsLoading, setError]);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -978,6 +985,10 @@ export default function ChatPage() {
         open={showScreenShare}
         onClose={() => setShowScreenShare(false)}
         onCaptureSent={async (url) => { await handleScreenCapture(url); }}
+        onLiveFrame={(url) => {
+          liveVisionUrlRef.current = url;
+          setLiveVisionActive(!!url);
+        }}
       />
       <VideoGeneratorPanel
         open={showVideoGen}
@@ -1009,6 +1020,17 @@ export default function ChatPage() {
               />
             </div>
             <h1 className="text-xl font-bold text-white">Jasper</h1>
+            {liveVisionActive && (
+              <button
+                onClick={() => setShowScreenShare(true)}
+                className="flex items-center gap-1.5 rounded-full bg-red-600/20 border border-red-500/40 px-2.5 py-1 text-xs text-red-300 hover:bg-red-600/30 transition-colors"
+                title="Jasper is watching your screen in real time — click to manage"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                <span className="font-medium">Live Vision</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+              </button>
+            )}
           </div>
           
           <div className="flex items-center gap-2">

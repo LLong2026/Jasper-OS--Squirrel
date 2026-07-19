@@ -1,17 +1,72 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { Monitor, X, Camera, Loader2, Play, Square } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { Monitor, X, Camera, Loader2, Play, Square, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 
+const LIVE_INTERVAL_MS = 8000; // capture a fresh frame every 8s
+
 /**
- * Screen-share panel: lets the user pick a monitor via getDisplayMedia,
- * preview it live, capture a frame, and send it to Jasper for vision analysis.
+ * Screen-share panel with optional LIVE VISION.
+ * - Snapshot mode: capture a single frame and send it.
+ * - Live Vision mode: keep the stream open and continuously capture a frame
+ *   every LIVE_INTERVAL_MS, pushing the latest URL up via onLiveFrame so the
+ *   parent can attach it to every outgoing message — giving Jasper real-time sight.
  */
-export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
+export default function ScreenSharePanel({ open, onClose, onCaptureSent, onLiveFrame }) {
   const [stream, setStream] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [error, setError] = useState('');
+  const [liveMode, setLiveMode] = useState(false);
+  const [lastLiveAt, setLastLiveAt] = useState(null);
   const videoRef = useRef(null);
+  const liveTimerRef = useRef(null);
+  const streamRef = useRef(null); // keep a stable ref for the interval closure
+
+  // keep streamRef in sync
+  useEffect(() => { streamRef.current = stream; }, [stream]);
+
+  const captureFrame = useCallback(async (label = 'live') => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return null;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+      const file = new File([blob], `screen-${label}-${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      return file_url;
+    } catch (err) {
+      console.error('Frame capture failed:', err);
+      return null;
+    }
+  }, []);
+
+  const stopLive = useCallback(() => {
+    if (liveTimerRef.current) {
+      clearInterval(liveTimerRef.current);
+      liveTimerRef.current = null;
+    }
+    setLiveMode(false);
+    if (onLiveFrame) onLiveFrame(null);
+  }, [onLiveFrame]);
+
+  const startLive = useCallback(async () => {
+    if (!streamRef.current) return;
+    setLiveMode(true);
+    // capture immediately, then on interval
+    const tick = async () => {
+      const url = await captureFrame('live');
+      if (url) {
+        setLastLiveAt(Date.now());
+        if (onLiveFrame) onLiveFrame(url);
+      }
+    };
+    tick();
+    liveTimerRef.current = setInterval(tick, LIVE_INTERVAL_MS);
+  }, [captureFrame, onLiveFrame]);
 
   const startShare = useCallback(async () => {
     setError('');
@@ -25,7 +80,7 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
         audio: false,
       });
       setStream(mediaStream);
-      // Attach to video element once rendered
+      streamRef.current = mediaStream;
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
@@ -33,7 +88,6 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
         }
       }, 50);
 
-      // Auto-stop when the user ends sharing via browser UI
       mediaStream.getVideoTracks()[0]?.addEventListener('ended', () => {
         stopShare();
       });
@@ -44,17 +98,16 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
         setError(err.message || 'Could not start screen share.');
       }
     }
-  }, []);
+  }, [stopShare]);
 
   const stopShare = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-    }
+    stopLive();
+    const s = streamRef.current;
+    if (s) s.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
     setStream(null);
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-  }, [stream]);
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }, [stopLive]);
 
   const handleClose = useCallback(() => {
     stopShare();
@@ -63,25 +116,25 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
   }, [stopShare, onClose]);
 
   const captureAndSend = useCallback(async () => {
-    const video = videoRef.current;
-    if (!video || !video.videoWidth) return;
     setIsCapturing(true);
     try {
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-      const file = new File([blob], `screen-share-${Date.now()}.png`, { type: 'image/png' });
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      if (onCaptureSent) await onCaptureSent(file_url);
+      const url = await captureFrame('snap');
+      if (url && onCaptureSent) await onCaptureSent(url);
     } catch (err) {
       setError(err.message || 'Capture failed.');
     } finally {
       setIsCapturing(false);
     }
-  }, [onCaptureSent]);
+  }, [captureFrame, onCaptureSent]);
+
+  // cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (liveTimerRef.current) clearInterval(liveTimerRef.current);
+      const s = streamRef.current;
+      if (s) s.getTracks().forEach(t => t.stop());
+    };
+  }, []);
 
   if (!open) return null;
 
@@ -91,7 +144,12 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
         <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
           <div className="flex items-center gap-2">
             <Monitor className="h-5 w-5 text-blue-400" />
-            <h2 className="text-lg font-semibold text-white">Screen Share with Jasper</h2>
+            <h2 className="text-lg font-semibold text-white">Jasper Vision</h2>
+            {liveMode && (
+              <span className="ml-2 flex items-center gap-1 rounded-full bg-red-600/20 border border-red-500/40 px-2 py-0.5 text-xs text-red-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" /> LIVE
+              </span>
+            )}
           </div>
           <Button variant="ghost" size="icon" onClick={handleClose} className="text-slate-400 hover:text-slate-200">
             <X className="h-5 w-5" />
@@ -107,15 +165,10 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
 
           <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center">
             {stream ? (
-              <video
-                ref={videoRef}
-                className="h-full w-full object-contain"
-                muted
-                playsInline
-              />
+              <video ref={videoRef} className="h-full w-full object-contain" muted playsInline />
             ) : (
               <div className="flex flex-col items-center gap-3 text-center">
-                <Monitor className="h-12 w-12 text-slate-600" />
+                <Eye className="h-12 w-12 text-slate-600" />
                 <p className="text-slate-400 text-sm max-w-xs">
                   Click "Select Monitor" — your browser will show all open screens and windows. Pick one for Jasper to see.
                 </p>
@@ -134,15 +187,25 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
                   <Square className="h-4 w-4" /> Stop Sharing
                 </Button>
               )}
+              {stream && !liveMode && (
+                <Button onClick={startLive} className="bg-green-600 hover:bg-green-700">
+                  <Eye className="h-4 w-4" /> Enable Live Vision
+                </Button>
+              )}
+              {stream && liveMode && (
+                <Button onClick={stopLive} variant="outline" className="border-slate-600 text-slate-200">
+                  <EyeOff className="h-4 w-4" /> Pause Live Vision
+                </Button>
+              )}
             </div>
             <div className="flex gap-2">
               <Button
                 onClick={captureAndSend}
-                disabled={!stream || isCapturing}
+                disabled={!stream || isCapturing || liveMode}
                 className="bg-green-600 hover:bg-green-700 disabled:bg-slate-700"
               >
                 {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-                {isCapturing ? 'Sending...' : 'Capture & Send to Jasper'}
+                {isCapturing ? 'Sending...' : 'Single Snapshot'}
               </Button>
               <Button variant="outline" onClick={handleClose} className="border-slate-700 text-slate-300">
                 Close
@@ -150,9 +213,15 @@ export default function ScreenSharePanel({ open, onClose, onCaptureSent }) {
             </div>
           </div>
 
-          {stream && (
+          {stream && liveMode && (
+            <p className="mt-3 text-xs text-green-300/80">
+              Live Vision is ON — Jasper is watching your screen in real time and sees a fresh frame every {LIVE_INTERVAL_MS / 1000}s. Just talk to her normally; she'll reference what she sees.
+              {lastLiveAt && <span className="block text-slate-500 mt-1">Last frame: {new Date(lastLiveAt).toLocaleTimeString()}</span>}
+            </p>
+          )}
+          {stream && !liveMode && (
             <p className="mt-3 text-xs text-slate-500">
-              Jasper will analyse the captured frame with vision. Capture again any time to share an updated view.
+              Tip: enable Live Vision so Jasper can see your screen continuously and interact with you about what's happening — not just a one-off snapshot.
             </p>
           )}
         </div>
