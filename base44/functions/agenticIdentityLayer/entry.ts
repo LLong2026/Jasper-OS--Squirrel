@@ -30,7 +30,23 @@ Deno.serve(async (req) => {
         truth_chain_anchor,
         status: 'active'
       });
-      return Response.json({ identity });
+      const tier = (governance_profile && governance_profile.tier) || 'TIER_2';
+      const did_document = {
+        '@context': ['https://www.w3.org/ns/did/v1', 'https://jasper.os/did/v3'],
+        id: did,
+        verificationMethod: [{
+          id: `${did}#ml-dsa`,
+          type: 'ML-DSA-65',
+          controller: did,
+          publicKeyMultibase: public_key
+        }],
+        authentication: [`${did}#ml-dsa`],
+        assertionMethod: [`${did}#ml-dsa`],
+        crypto_profile: 'PQ_NATIVE',
+        did_version: 3,
+        governance_tier: tier
+      };
+      return Response.json({ identity, did_document });
     }
 
     if (action === 'resolve') {
@@ -68,6 +84,33 @@ Deno.serve(async (req) => {
     if (action === 'list') {
       const identities = await base44.entities.AgentIdentity.list('-created_date', 100);
       return Response.json({ identities });
+    }
+
+    if (action === 'resolve_did_document') {
+      const { did } = body;
+      if (!did) return Response.json({ error: 'did is required' }, { status: 400 });
+      const matches = await base44.entities.AgentIdentity.filter({ did });
+      if (!matches || matches.length === 0) return Response.json({ error: 'Identity not found' }, { status: 404 });
+      const id = matches[0];
+      const tier = (id.governance_profile && id.governance_profile.tier) || 'TIER_2';
+      const did_document = {
+        '@context': ['https://www.w3.org/ns/did/v1', 'https://jasper.os/did/v3'],
+        id: id.did,
+        verificationMethod: [{
+          id: `${id.did}#ml-dsa`,
+          type: 'ML-DSA-65',
+          controller: id.did,
+          publicKeyMultibase: id.public_key
+        }],
+        authentication: [`${id.did}#ml-dsa`],
+        assertionMethod: [`${id.did}#ml-dsa`],
+        crypto_profile: 'PQ_NATIVE',
+        did_version: 3,
+        governance_tier: tier,
+        trust_score: id.trust_score,
+        status: id.status
+      };
+      return Response.json({ did_document });
     }
 
     return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });

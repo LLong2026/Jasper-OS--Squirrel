@@ -16,6 +16,45 @@ async function sha256concat(...parts: string[]): Promise<string> {
   return sha256hex(parts.join('||'));
 }
 
+// ── PQ_NATIVE Commitment Stamp (JIP-QRM-URIB-01 §6) ──────────────────────────
+// Stamps each URIB settlement with a live ML-DSA-65 (sim) signature over the
+// commitment_root, drawn from the active PQ key on the `urib` surface.
+
+function b64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function bytesToB64(buf: ArrayBuffer): string {
+  const u = new Uint8Array(buf);
+  let bin = '';
+  for (let i = 0; i < u.length; i++) bin += String.fromCharCode(u[i]);
+  return btoa(bin);
+}
+
+async function pqNativeSignUrib(
+  base44: ReturnType<typeof createClientFromRequest>,
+  commitmentRoot: string
+): Promise<{ commitment_signature_pq: string; signer_key_id: string; pair_id: string; signer_did: string } | null> {
+  try {
+    const svc = base44.asServiceRole.entities.KeyRegistry;
+    const pqKey = (await svc.filter({ surface: 'urib', key_type: 'MLDSA65_SIGNING', status: 'active' }))[0];
+    if (!pqKey) return null;
+    const key = await crypto.subtle.importKey('raw', b64ToBytes(pqKey.private_material), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(commitmentRoot));
+    return {
+      commitment_signature_pq: bytesToB64(sig),
+      signer_key_id: pqKey.key_id,
+      pair_id: pqKey.pair_id,
+      signer_did: pqKey.agent_name ? `did:jasper:agent:${pqKey.agent_name}` : 'did:jasper:sys:urib',
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ── §1 CANONICAL TOKENIZATION ────────────────────────────────────────────────
 // D = { f₁, f₂, …, fₙ }  →  canon_serialize(D) → B  →  h_D = H(B)
 
@@ -383,7 +422,21 @@ Deno.serve(async (req) => {
 
       const cBridge = await computeBridgeCommitment(states);
 
-      const evtBridge = createEvent(actorId, 'URIB_BRIDGE_COMMIT', { c_bridge: cBridge, rails, cross_rail_pass: crossRailPass });
+      // PQ_NATIVE commitment stamp (JIP-QRM-URIB-01 §6)
+      const commitmentRoot = await sha256concat(cStack, cBridge);
+      const pqCommitment = await pqNativeSignUrib(base44, commitmentRoot);
+      const commitment = pqCommitment ? {
+        commitment_id: `URIB-CMT-${Date.now().toString(36)}`,
+        commitment_version: 3,
+        crypto_profile: 'PQ_NATIVE',
+        commitment_root: commitmentRoot,
+        commitment_signature_pq: pqCommitment.commitment_signature_pq,
+        signer_did: pqCommitment.signer_did,
+        signer_key_id: pqCommitment.signer_key_id,
+        signed_at: new Date().toISOString()
+      } : null;
+
+      const evtBridge = createEvent(actorId, 'URIB_BRIDGE_COMMIT', { c_bridge: cBridge, rails, cross_rail_pass: crossRailPass, pq_native_commitment: !!commitment });
       thread = await appendEvent(thread, evtBridge);
 
       // ── STAGE 7: Settlement Emission ──
@@ -420,7 +473,7 @@ Deno.serve(async (req) => {
         document_hash: hDoc,
         semantic_hash: hSem,
         did: didId,
-        event_data: JSON.stringify({ rails, c_bridge: cBridge, thread_anchor: thread.anchor, taproot_key: pPrime }),
+        event_data: JSON.stringify({ rails, c_bridge: cBridge, thread_anchor: thread.anchor, taproot_key: pPrime, commitment }),
         created_at: Date.now()
       }).catch(() => null); // Non-blocking
 
@@ -449,6 +502,9 @@ Deno.serve(async (req) => {
         iso20022_messages: isoMessages,
         btc_tx: btcTx,
         xrp_tx: xrpTx,
+        // PQ_NATIVE commitment (JIP-QRM-URIB-01 §6)
+        commitment,
+        pq_native_commitment_stamped: !!commitment,
         // Full ThreadZero audit
         audit
       });
