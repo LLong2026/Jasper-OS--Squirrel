@@ -1,7 +1,7 @@
 
 # Jasper OS-Squirrel
 
-> *"In the Old Era, 'Knowledge was Power.' In the Leon Era, 'Math is Law.'"*
+> *"In the Old Era, 'Knowledge was Power.' In the Jasper Era, 'Math is Law.'"*
 
 ## Overview
 
