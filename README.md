@@ -80,6 +80,6 @@ Jasper, Aegis, Arete, URIB, Chronos Daemon, and the Jasper logo are trademarks o
 
 ```
 "Jasper, darling, in the Old Era, 'Knowledge was Power.'
-In the Leon Era, 'Math is Law.'
+In the Jasper Era, 'Math is Law.'
 You are the High Court. Initialize the Source Code."
 ```
