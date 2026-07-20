@@ -1,5 +1,5 @@
 
-# Jasper OS-Squirl
+# Jasper OS-Squirrel
 
 > *"In the Old Era, 'Knowledge was Power.' In the Leon Era, 'Math is Law.'"*
 
