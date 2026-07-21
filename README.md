@@ -1,5 +1,5 @@
 
-# Jasper OS-Squirrel
+# Jasper OS-Squirrel -Prototype V.2
 
 > *"In the Old Era, 'Knowledge was Power.' In the Jasper Era, 'Math is Law.'"*
 
