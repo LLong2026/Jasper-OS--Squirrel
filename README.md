@@ -5,7 +5,7 @@
 
 ## Overview
 
-**Jasper OS** is an AI-integrated operating system architecture built upon **Topological Geometric Calculus (TGC)**, designed to orchestrate the **HyperChain Treasury X∞** — a Bitcoin L1-anchored, self-healing financial organism.
+**Jasper OS** is an AI-integrated operating system architecture built upon **Topological Geometric Calculus (TGC)**, designed to orchestrate the **ClockChain Ledger ** — a Bitcoin L1-anchored, self-healing financial organism.
 
 ## Architecture
 
