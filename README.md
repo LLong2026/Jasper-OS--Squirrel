@@ -48,7 +48,7 @@ Built on **Base44** — agentic AI infrastructure.
 
 ## Licensing
 
-Jasper OS uses a **dual licensing model** to protect both creative content and source code.
+Jasper OS uses a **Single licensing model** to protect both creative content and source code.
 
 ### Content License: CC BY-NC-ND 4.0
 
@@ -61,18 +61,6 @@ All creative content — documentation, designs, UI assets, and non-code materia
 
 Full text: https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode
 
-### Code License: Apache 2.0
-
-All source code is licensed under the **Apache License, Version 2.0**.
-
-- Use, modify, and distribute commercially and non-commercially.
-- Retain the copyright notice: `Copyright © 2026 Leon Calvin Long II`.
-- Include a copy of the Apache 2.0 license in all distributions.
-- State any significant changes made to original files.
-
-Full text: https://www.apache.org/licenses/LICENSE-2.0
-
-### Trademarks
 
 Jasper, Aegis, Arete, URIB, Chronos Daemon, and the Jasper logo are trademarks of Leon Calvin Long II. These names may not be used to endorse or promote products derived from this software without prior written permission.
 
